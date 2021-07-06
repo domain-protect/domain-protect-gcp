@@ -1,0 +1,4 @@
+project            = "GCP_PROJECT_ID"
+slack_channels     = ["devsecops"]
+slack_channels_dev = ["devsecops"]
+slack_webhook_urls = ["https://hooks.slack.com/services/XXXXXXXXX/XXXXXXXXX/XXXXXXXXXXXXXXXXXX"]

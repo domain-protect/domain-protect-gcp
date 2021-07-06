@@ -1,0 +1,4 @@
+google-cloud-dns==0.32.3
+google-cloud-pubsub==2.6.0
+google-cloud-resource-manager==0.30.3
+dnspython==2.1.0

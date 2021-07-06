@@ -1,0 +1,17 @@
+# Terraform
+*.tfstate
+*.tfstate.backup
+*.tfvars
+.terraform/
+.terraform*
+
+#Function code
+*.zip
+
+#IDEs
+.idea
+.vscode
+
+#MAC OS
+.DS_Store
+*.DS_Store
