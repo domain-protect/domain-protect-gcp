@@ -10,12 +10,12 @@ variable "name" {
 
 variable "region" {
   description = "GCP region to deploy infrastructure"
-  default     = "europe-west1"
+  default     = "europe-west2"
 }
 
 variable "app_service_region" {
   description = "GCP region which App Service is deployed to, this is a Project wide setting"
-  default     = "europe-west1"
+  default     = "europe-west2"
 }
 
 variable "create_app_engine" {
@@ -25,7 +25,7 @@ variable "create_app_engine" {
 
 variable "zone" {
   description = "GCP availability zone"
-  default     = "europe-west1-c"
+  default     = "europe-west2-c"
 }
 
 variable "functions" {
