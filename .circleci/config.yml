@@ -15,6 +15,10 @@ jobs:
     steps:
       - checkout
       - run:
+          name: set Google Cloud credentials
+          command: 
+            echo $GOOGLE_CLOUD_KEYFILE_JSON > google_cloud_keyfile.json
+      - run:
           name: terraform state bucket variables
           command: |
             echo "export TERRAFORM_STATE_BUCKET=$TERRAFORM_STATE_BUCKET" >> $BASH_ENV

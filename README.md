@@ -101,7 +101,7 @@ export APP_ENVIRONMENT=dev
 | ------------------------------- | -------------------------------------------------|
 | TERRAFORM_STATE_BUCKET          | tfstate78936                                     |
 | TERRAFORM_STATE_KEY             | "terraform/state/domain-protect-gcp"             |
-| TF_VAR_project                  | "mycoolGCPproject"                               |       
+| TF_VAR_project                  | mycoolgcpproject                               |       
 | TF_VAR_slack_channels           | ["security-alerts"]                              |
 | TF_VAR_slack_channels_dev       | ["security-alerts-dev"]                          |
 | TF_VAR_slack_webhook_urls       | ["https://hooks.slack.com/services/XXX/XXX/XXX"] | 
