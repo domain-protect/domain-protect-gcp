@@ -7,7 +7,8 @@ resource "random_string" "value" {
 }
 
 resource "google_storage_bucket" "function_bucket" {
-  name          = "${var.name}-${local.env}-${random_string.value.result}"
-  location      = var.region
-  force_destroy = true
+  name                        = "${var.name}-${local.env}-${random_string.value.result}"
+  location                    = var.region
+  force_destroy               = true
+  uniform_bucket_level_access = true
 }
