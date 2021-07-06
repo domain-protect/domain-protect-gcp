@@ -31,5 +31,13 @@ python gcp-cname.py
 
 ![Alt text](images/gcp-cname.png?raw=true "Detect vulnerable subdomains")
 
+## usage - CNAMEs for missing storage accounts
+```
+gcloud auth login
+python gcp-cname-storage.py
+```
+
+![Alt text](images/gcp-cname-storage.png?raw=true "Detect vulnerable subdomains")
+
 ## acknowledgement
 * NS subdomain takeover detection based on [NSDetect](https://github.com/shivsahni/NSDetect)
