@@ -74,7 +74,7 @@ terraform apply
 DNS Reader (roles/dns.reader)
 Folder Viewer (roles/resourcemanager.folderViewer)
 ```
-* This step is performed manually to avoid giving org wide IAM permisssions to the deployment service account
+* This step is performed manually to avoid giving org wide IAM permisssions to the Terraform service account
 
 ## adding notifications to extra Slack channels
 * add an extra channel to your slack_channels variable list
