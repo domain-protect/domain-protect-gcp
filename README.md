@@ -36,6 +36,7 @@ Scans Google Cloud DNS for:
 ## requirements
 * Storage bucket for Terraform state file
 * Terraform 1.0.x
+* Service Usage API enabled on Google Cloud project
 
 ## deployment permissions
 The Terraform service account requires the following roles at the Project level:
@@ -48,7 +49,7 @@ Project IAM Admin
 Pub/Sub Admin
 Service Account Admin
 Service Account User
-Service Management Administrator
+Service Usage Admin
 Storage Admin
 ```
 
@@ -99,9 +100,11 @@ export APP_ENVIRONMENT=dev
 
 | ENVIRONMENT VARIABLE            | EXAMPLE VALUE / COMMENT                          |
 | ------------------------------- | -------------------------------------------------|
+| GOOGLE_CLOUD_KEYFILE_JSON       | JSON keyfile downloaded from GCP console         |
+| GOOGLE_APPLICATION_CREDENTIALS  | google_cloud_keyfile.json                        | 
 | TERRAFORM_STATE_BUCKET          | tfstate78936                                     |
-| TERRAFORM_STATE_KEY             | "terraform/state/domain-protect-gcp"             |
-| TF_VAR_project                  | mycoolgcpproject                               |       
+| TERRAFORM_STATE_KEY             | terraform/state/domain-protect-gcp               |
+| TF_VAR_project                  | mycoolgcpproject                                 |       
 | TF_VAR_slack_channels           | ["security-alerts"]                              |
 | TF_VAR_slack_channels_dev       | ["security-alerts-dev"]                          |
 | TF_VAR_slack_webhook_urls       | ["https://hooks.slack.com/services/XXX/XXX/XXX"] | 
