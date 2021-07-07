@@ -58,7 +58,7 @@ class gcp:
 
             for managed_zone in managed_zones:
                 #print(managed_zone.name, managed_zone.dns_name, managed_zone.description)
-                print("Searching for vulnerable NS records in " + managed_zone.dns_name)
+                print("Searching for vulnerable A records in " + managed_zone.dns_name)
 
                 dns_record_client = google.cloud.dns.zone.ManagedZone(name=managed_zone.name, client=dns_client)
 

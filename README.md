@@ -103,7 +103,7 @@ export APP_ENVIRONMENT=dev
 | GOOGLE_CLOUD_KEYFILE_JSON       | JSON keyfile downloaded from GCP console         |
 | GOOGLE_APPLICATION_CREDENTIALS  | google_cloud_keyfile.json                        | 
 | TERRAFORM_STATE_BUCKET          | tfstate78936                                     |
-| TERRAFORM_STATE_KEY             | terraform/state/domain-protect-gcp               |
+| TERRAFORM_STATE_PREFIX          | terraform/state/domain-protect-gcp               |
 | TF_VAR_project                  | mycoolgcpproject                                 |       
 | TF_VAR_slack_channels           | ["security-alerts"]                              |
 | TF_VAR_slack_channels_dev       | ["security-alerts-dev"]                          |

@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 # pip install google-cloud-dns
 # pip install google-cloud-resource-manager
-# pip install dnspython
+# pip install requests
 import google.cloud.dns
 from google.cloud import resource_manager
 import json
 import argparse
 from datetime import datetime
-import dns.resolver
+import requests
 
 def json_serial(obj):
     """JSON serializer for objects not serializable by default json code"""
@@ -33,7 +33,8 @@ class bcolors:
 vulnerable_domains = []
 suspected_domains = []
 cname_values = []
-vulnerability_list = ["azure", ".cloudapp.net", "core.windows.net", "elasticbeanstalk.com", "trafficmanager.net" ]
+global vulnerability_list
+vulnerability_list = ["amazonaws.com", "cloudfront.net", "c.storage.googleapis.com"]
 verbose_mode = False
 
 def my_print(text, type):
@@ -75,20 +76,25 @@ def print_list(lst):
         entry=str(counter)+". "+item
         my_print("\t"+entry, "INSECURE_WS")
 
-def vulnerable_cname(domain_name):
+def vulnerable_storage(domain_name):
 
-    global aRecords, isException
-    isException=False
     try:
-        aRecords= dns.resolver.resolve(domain_name, 'A')
-        return False, ""
-    except dns.resolver.NXDOMAIN:
-        if dns.resolver.resolve(domain_name, 'CNAME'):
-            return True, ""
+        response = requests.get('http://' + domain_name)
+        if "NoSuchBucket" in response.text:
+            return "True"
         else:
-            return False, "\tI: Error fetching CNAME Records for " + domain_name
+            return "False"
     except:
-        return False, ""
+        pass
+
+    try:
+        response = requests.get('https://' + domain_name)
+        if "NoSuchBucket" in response.text:
+            return "True"
+        else:
+            return "False"
+    except:
+        return "False"
 
 class gcp:
     def __init__(self, project):
@@ -102,7 +108,7 @@ class gcp:
 
             for managed_zone in managed_zones:
                 #print(managed_zone.name, managed_zone.dns_name, managed_zone.description)
-                print("Searching for vulnerable CNAME records in " + managed_zone.dns_name)
+                print("Searching for A records with missing storage buckets in " + managed_zone.dns_name)
 
                 dns_record_client = google.cloud.dns.zone.ManagedZone(name=managed_zone.name, client=dns_client)
 
@@ -111,24 +117,24 @@ class gcp:
 
                     for resource_record_set in resource_record_sets:
                         #print(resource_record_set.name, resource_record_set.record_type, resource_record_set.rrdatas)
-                        if "CNAME" in resource_record_set.record_type:
-                            if any(vulnerability in resource_record_set.rrdatas[0] for vulnerability in vulnerability_list):
-                                cname_record = resource_record_set.name
-                                cname_value = resource_record_set.rrdatas[0]
-                                print("Testing " + resource_record_set.name + " for vulnerability")
-                                result, exception_message = vulnerable_cname(cname_record)
-                                i = i + 1
-                                if result:
-                                    vulnerable_domains.append(cname_record)
-                                    cname_values.append(cname_value)
-                                    my_print(str(i) + ". " + cname_record + " CNAME " +  cname_value ,"ERROR")
-                                elif (result==False) and (isException==True):
-                                    suspected_domains.append(cname_record)
-                                    my_print(str(i) + ". " + cname_record + " CNAME " +  cname_value,"INFOB")
-                                    my_print(exception_message, "INFO")
+                        if resource_record_set.record_type in "A":
+                            for ip_address in resource_record_set.rrdatas:
+                                if not ip_address.startswith("10."):
+                                    a_record = resource_record_set.name
+                                    print("Testing " + a_record + " for vulnerability")
+                                    try:
+                                        result = vulnerable_storage(a_record)
+                                        i = i + 1
+                                        if result == "True":
+                                            vulnerable_domains.append(a_record)
+                                            my_print(str(i) + ". " + a_record,"ERROR")
+                                        elif result == "False":
+                                            suspected_domains.append(a_record)
+                                            my_print(str(i) + ". " + a_record, "SECURE")
+                                    except:
+                                        pass    
                                 else:
-                                    my_print(str(i) + ". " + cname_record + " CNAME " +  cname_value,"SECURE")
-                                    my_print(exception_message, "INFO")
+                                    my_print("WARNING: no response from test","INFOB")
                 except:
                     pass
         except:

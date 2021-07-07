@@ -45,7 +45,7 @@ class gcp:
 
             for managed_zone in managed_zones:
                 #print(managed_zone.name, managed_zone.dns_name, managed_zone.description)
-                print("Searching for vulnerable NS records in " + managed_zone.dns_name)
+                print("Searching for vulnerable CNAME records in " + managed_zone.dns_name)
 
                 dns_record_client = google.cloud.dns.zone.ManagedZone(name=managed_zone.name, client=dns_client)
 
@@ -56,18 +56,17 @@ class gcp:
                         #print(resource_record_set.name, resource_record_set.record_type, resource_record_set.rrdatas)
                         if "CNAME" in resource_record_set.record_type:
                             if any(vulnerability in resource_record_set.rrdatas[0] for vulnerability in vulnerability_list):
-                                if ".dv.googlehosted.com" not in resource_record_set.rrdatas[0]:
-                                    cname_record = resource_record_set.name
-                                    cname_value = resource_record_set.rrdatas[0]
-                                    print("Testing " + resource_record_set.name + " for vulnerability")
-                                    try:
-                                        result = vulnerable_cname(cname_record)
-                                        if result == "True":
-                                            print("VULNERABLE: " + cname_record + "  CNAME  " + cname_value + " in GCP project " + project)
-                                            vulnerable_domains.append(cname_record)
-                                            json_data["Findings"].append({"Project": project, "Domain": cname_record, "CNAME": cname_value})
-                                    except:
-                                        pass
+                                cname_record = resource_record_set.name
+                                cname_value = resource_record_set.rrdatas[0]
+                                print("Testing " + resource_record_set.name + " for vulnerability")
+                                try:
+                                    result = vulnerable_cname(cname_record)
+                                    if result == "True":
+                                        print("VULNERABLE: " + cname_record + "  CNAME  " + cname_value + " in GCP project " + project)
+                                        vulnerable_domains.append(cname_record)
+                                        json_data["Findings"].append({"Project": project, "Domain": cname_record, "CNAME": cname_value})
+                                except:
+                                    pass
 
                 except:
                     pass
