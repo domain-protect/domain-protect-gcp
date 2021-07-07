@@ -22,7 +22,7 @@ jobs:
           name: terraform state bucket variables
           command: |
             echo "export TERRAFORM_STATE_BUCKET=$TERRAFORM_STATE_BUCKET" >> $BASH_ENV
-            echo "export TERRAFORM_STATE_KEY=$TERRAFORM_STATE_PREFIX" >> $BASH_ENV
+            echo "export TERRAFORM_STATE_PREFIX=$TERRAFORM_STATE_PREFIX" >> $BASH_ENV
       - run:
           name: terraform init
           command: "set -x;terraform init -backend-config=bucket=$TERRAFORM_STATE_BUCKET -backend-config=prefix=$TERRAFORM_STATE_PREFIX"
