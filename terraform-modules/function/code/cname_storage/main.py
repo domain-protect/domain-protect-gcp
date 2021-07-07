@@ -24,25 +24,19 @@ def vulnerable_storage(domain_name):
 
     try:
         response = requests.get('http://' + domain_name)
-
         if "NoSuchBucket" in response.text:
             return "True"
-
         else:
             return "False"
-
     except:
         pass
 
     try:
         response = requests.get('https://' + domain_name)
-
         if "NoSuchBucket" in response.text:
             return "True"
-
         else:
             return "False"
-
     except:
         return "False"
 
@@ -58,7 +52,7 @@ class gcp:
 
             for managed_zone in managed_zones:
                 #print(managed_zone.name, managed_zone.dns_name, managed_zone.description)
-                print("Searching for vulnerable NS records in " + managed_zone.dns_name)
+                print("Searching for CNAMEs with missing storage buckets in " + managed_zone.dns_name)
 
                 dns_record_client = google.cloud.dns.zone.ManagedZone(name=managed_zone.name, client=dns_client)
 

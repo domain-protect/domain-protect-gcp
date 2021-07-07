@@ -108,7 +108,7 @@ class gcp:
 
             for managed_zone in managed_zones:
                 #print(managed_zone.name, managed_zone.dns_name, managed_zone.description)
-                print("Searching CNAMEs with missing storage buckets in " + managed_zone.dns_name)
+                print("Searching for A records with missing storage buckets in " + managed_zone.dns_name)
 
                 dns_record_client = google.cloud.dns.zone.ManagedZone(name=managed_zone.name, client=dns_client)
 
@@ -117,20 +117,22 @@ class gcp:
 
                     for resource_record_set in resource_record_sets:
                         #print(resource_record_set.name, resource_record_set.record_type, resource_record_set.rrdatas)
-                        if "CNAME" in resource_record_set.record_type:
-                            if any(vulnerability in resource_record_set.rrdatas[0] for vulnerability in vulnerability_list):
-                                cname_record = resource_record_set.name
-                                cname_value = resource_record_set.rrdatas[0]
-                                print("Testing " + resource_record_set.name + " for vulnerability")
-                                result = vulnerable_storage(cname_record)
-                                i = i + 1
-                                if result == "True":
-                                    vulnerable_domains.append(cname_record)
-                                    cname_values.append(cname_value)
-                                    my_print(str(i) + ". " + cname_record + " CNAME " +  cname_value ,"ERROR")
-                                elif result == "False":
-                                    suspected_domains.append(cname_record)
-                                    my_print(str(i) + ". " + cname_record + " CNAME " +  cname_value,"SECURE")
+                        if resource_record_set.record_type in "A":
+                            for ip_address in resource_record_set.rrdatas:
+                                if not ip_address.startswith("10."):
+                                    a_record = resource_record_set.name
+                                    print("Testing " + a_record + " for vulnerability")
+                                    try:
+                                        result = vulnerable_storage(a_record)
+                                        i = i + 1
+                                        if result == "True":
+                                            vulnerable_domains.append(a_record)
+                                            my_print(str(i) + ". " + a_record,"ERROR")
+                                        elif result == "False":
+                                            suspected_domains.append(a_record)
+                                            my_print(str(i) + ". " + a_record, "SECURE")
+                                    except:
+                                        pass    
                                 else:
                                     my_print("WARNING: no response from test","INFOB")
                 except:
