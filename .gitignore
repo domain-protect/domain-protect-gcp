@@ -15,3 +15,7 @@
 #MAC OS
 .DS_Store
 *.DS_Store
+
+#Python coverage
+.coverage
+*/htmlcov/*
