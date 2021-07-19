@@ -4,7 +4,7 @@
 
 ### deploy to security audit project and scan your entire GCP Organization
 
-![Alt text](images/gcp-architecture.png?raw=true "Domain Protect GCP architecture")
+![Alt text](images/domain-protect-gcp.png?raw=true "Domain Protect GCP architecture")
 
 ### receive alerts by Slack or email
 
