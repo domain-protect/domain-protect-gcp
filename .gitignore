@@ -19,3 +19,4 @@
 #Python coverage
 .coverage
 */htmlcov/*
+*/__pycache__/*

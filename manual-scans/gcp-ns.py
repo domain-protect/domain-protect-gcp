@@ -2,12 +2,13 @@
 # pip install google-cloud-dns
 # pip install google-cloud-resource-manager
 # pip install dnspython
-import google.cloud.dns
-from google.cloud import resource_manager
-import json
-import argparse
 from datetime import datetime
+
 import dns.resolver
+import google.cloud.dns
+
+from utils import list_all_projects
+
 
 def json_serial(obj):
     """JSON serializer for objects not serializable by default json code"""
@@ -131,10 +132,10 @@ class gcp:
 
 if __name__ == "__main__":
 
-    client = resource_manager.Client()
-    for project in client.list_projects():
-        if "sys-" not in project.project_id:
-            gcp(project.name)
+    projects = list_all_projects()
+    
+    for project in projects:
+        gcp(project)
 
     count = len(vulnerable_domains)
     my_print("\nTotal Vulnerable Domains Found: "+str(count), "INFOB")
