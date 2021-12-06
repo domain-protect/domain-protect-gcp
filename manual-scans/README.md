@@ -6,12 +6,18 @@ Scans Google Cloud DNS for:
 * Google Cloud Load Balancers for which the backend storage bucket has been deleted
 
 ## requirements
-* Python 3.x
+* Python 3.9
+* pip
+* venv
+## setup
+* optionally create and activate a virtual environment
 ```
-pip install google-cloud-dns
-pip install google-cloud-resource-manager
-pip install dnspython
-pip install requests
+python -m venv .venv
+source .venv/bin/activate
+```
+* install dependencies
+```
+pip install -r requirements.txt
 ```
 
 ## usage - subdomain NS delegations
@@ -47,5 +53,6 @@ python gcp-a-storage.py
 
 ![Alt text](images/gcp-a-storage.png?raw=true "Detect vulnerable subdomains")
 
-## acknowledgement
+## acknowledgements
+* Function to list all GCP projects inspired by [Joan Grau's blog](https://blog.graunoel.com/resource-manager-list-all-projects/)
 * NS subdomain takeover detection based on [NSDetect](https://github.com/shivsahni/NSDetect)
