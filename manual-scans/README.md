@@ -9,7 +9,8 @@ Scans Google Cloud DNS for:
 * Python 3.9
 * pip
 * venv
-## setup
+
+## Python setup
 * optionally create and activate a virtual environment
 ```
 python -m venv .venv
@@ -20,9 +21,22 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
+## GCP setup
+* create a domain-protect service account in one of your projects
+* assign built-in roles to the service account at the organization level:
+```
+DNS Reader (roles/dns.reader)
+Folder Viewer (roles/resourcemanager.folderViewer)
+Organization Viewer (roles/resourcemanager.organizationViewer) 
+```
+* create a JSON key for your service account and download to your laptop
+* create an environment variable, e.g.
+```
+export GOOGLE_APPLICATION_CREDENTIALS="/Users/sylvia/gcp/domain-protect-service-account.json"
+```
+
 ## usage - subdomain NS delegations
 ```
-gcloud auth login
 python gcp-ns.py
 ```
 
@@ -30,7 +44,6 @@ python gcp-ns.py
 
 ## usage - vulnerable CNAMEs
 ```
-gcloud auth login
 python gcp-cname.py
 ```
 
@@ -38,7 +51,6 @@ python gcp-cname.py
 
 ## usage - CNAMEs for missing storage buckets
 ```
-gcloud auth login
 python gcp-cname-storage.py
 ```
 
@@ -47,7 +59,6 @@ python gcp-cname-storage.py
 ## usage - A records for missing storage buckets
 * looks for Google Cloud Load Balancers for which the backend storage bucket has been deleted
 ```
-gcloud auth login
 python gcp-a-storage.py
 ```
 
