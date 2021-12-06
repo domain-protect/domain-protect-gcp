@@ -84,8 +84,8 @@ workflows:
       - plan:
           filters: *branch-filter
           requires:
-            - black
-            - format
+            - python_black
+            - terraform_format
       - approve:
           filters: *branch-filter
           type: approval
