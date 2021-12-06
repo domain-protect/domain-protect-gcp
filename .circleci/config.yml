@@ -67,9 +67,7 @@ jobs:
 workflows:
   cd:
     jobs:
-      - test:
-          jobs:
-            - format
+      - format
       - plan:
           filters: *branch-filter
       - approve:
