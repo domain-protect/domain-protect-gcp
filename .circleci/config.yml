@@ -11,7 +11,7 @@ jobs:
   plan:
     working_directory: /tmp/project
     docker:
-      - image: hashicorp/terraform:1.0.0
+      - image: hashicorp/terraform:1.0.11
     steps:
       - checkout
       - run:
@@ -43,7 +43,7 @@ jobs:
             - .
   apply:
     docker:
-      - image: hashicorp/terraform:1.0.0
+      - image: hashicorp/terraform:1.0.11
     steps:
       - attach_workspace:
           at: .
