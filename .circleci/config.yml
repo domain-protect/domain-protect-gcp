@@ -8,7 +8,19 @@ aliases:
         - main
 
 jobs:
-  format:
+  python_black:
+    working_directory: /tmp/project
+    docker:
+      - image: python:3.8
+    steps:
+      - checkout
+      - run:
+          name: install dependencies
+          command: pip install -r requirements-dev.txt
+      - run:
+          name: black on manual scans
+          command: black --check manual-scans/
+  terraform_format:
     working_directory: /tmp/project
     docker:
       - image: hashicorp/terraform:1.0.11
@@ -67,11 +79,13 @@ jobs:
 workflows:
   cd:
     jobs:
-      - format
+      - python_black
+      - terraform_format
       - plan:
           filters: *branch-filter
           requires:
-            - format
+            - python_black
+            - terraform_format
       - approve:
           filters: *branch-filter
           type: approval
