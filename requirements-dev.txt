@@ -1,2 +1,1 @@
--r requirements.txt
-black
+black==19.10b0
