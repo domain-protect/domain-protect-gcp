@@ -70,6 +70,8 @@ workflows:
       - format
       - plan:
           filters: *branch-filter
+          requires:
+            - format
       - approve:
           filters: *branch-filter
           type: approval
