@@ -15,6 +15,9 @@ jobs:
     steps:
       - checkout
       - run:
+          name: terraform format
+          command: terraform fmt -check
+      - run:
           name: set Google Cloud credentials
           command: 
             echo $GOOGLE_CLOUD_KEYFILE_JSON > google_cloud_keyfile.json
