@@ -15,22 +15,22 @@ resource "google_storage_bucket_object" "function" {
 }
 
 resource "google_cloudfunctions_function" "function" {
-  count                         = length(var.functions)
-  name                          = "${var.name}-${var.functions[count.index]}-${local.env}"
-  description                   = "${var.name} ${var.functions[count.index]} function in ${local.env} environment"
-  available_memory_mb           = var.available_memory
-  source_archive_bucket         = var.bucket_name
-  source_archive_object         = google_storage_bucket_object.function.*.name[count.index]
-  timeout                       = var.timeout
-  entry_point                   = var.functions[count.index]
-  runtime                       = var.runtime
-  service_account_email         = var.service_account_email
-  ingress_settings              = var.ingress_settings
+  count                 = length(var.functions)
+  name                  = "${var.name}-${var.functions[count.index]}-${local.env}"
+  description           = "${var.name} ${var.functions[count.index]} function in ${local.env} environment"
+  available_memory_mb   = var.available_memory
+  source_archive_bucket = var.bucket_name
+  source_archive_object = google_storage_bucket_object.function.*.name[count.index]
+  timeout               = var.timeout
+  entry_point           = var.functions[count.index]
+  runtime               = var.runtime
+  service_account_email = var.service_account_email
+  ingress_settings      = var.ingress_settings
 
   environment_variables = {
-    SECURITY_PROJECT    = var.project
-    APP_ENVIRONMENT     = local.env
-    APP_NAME            = var.name
+    SECURITY_PROJECT = var.project
+    APP_ENVIRONMENT  = local.env
+    APP_NAME         = var.name
   }
 
   event_trigger {
