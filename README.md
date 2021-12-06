@@ -73,6 +73,7 @@ terraform apply
 ```
 DNS Reader (roles/dns.reader)
 Folder Viewer (roles/resourcemanager.folderViewer)
+Organization Viewer (roles/resourcemanager.organizationViewer) 
 ```
 * This step is performed manually to avoid giving org wide IAM permisssions to the Terraform service account
 
