@@ -35,10 +35,14 @@ class gcp:
 
         print("Searching for Google Cloud DNS hosted zones in " + project + " project")
         dns_client = google.cloud.dns.client.Client(project=self.project)
+        managed_zones = dns_client.list_zones()
+
         try:
+            
             managed_zones = dns_client.list_zones()
 
             for managed_zone in managed_zones:
+
                 # print(managed_zone.name, managed_zone.dns_name, managed_zone.description)
                 print("Searching for vulnerable NS records in " + managed_zone.dns_name)
 
@@ -46,7 +50,7 @@ class gcp:
                     name=managed_zone.name, client=dns_client
                 )
 
-                try:
+                if dns_record_client.list_resource_record_sets():
                     resource_record_sets = dns_record_client.list_resource_record_sets()
 
                     for resource_record_set in resource_record_sets:
@@ -67,11 +71,9 @@ class gcp:
                                     my_print(str(i) + ". " + ns_record, "ERROR")
                                 else:
                                     my_print(str(i) + ". " + ns_record, "SECURE")
-                except:
-                    pass
-        except:
+        except google.api_core.exceptions.Forbidden:
             pass
-
+        
 
 if __name__ == "__main__":
 
