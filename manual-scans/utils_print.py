@@ -12,35 +12,35 @@ class bcolors:
     FAIL = "\033[95m"
 
 
-def my_print(text, type):
-    if type == "INFO":
+def my_print(text, message_type):
+    if message_type == "INFO":
         print(bcolors.INFO + text + bcolors.ENDC)
         return
-    if type == "PLAIN_OUTPUT_WS":
+    if message_type == "PLAIN_OUTPUT_WS":
         print(bcolors.INFO + text + bcolors.ENDC)
         return
-    if type == "INFOB":
+    if message_type == "INFOB":
         print(bcolors.INFO + bcolors.BOLD + text + bcolors.ENDC)
         return
-    if type == "ERROR":
+    if message_type == "ERROR":
         print(bcolors.BGRED + bcolors.FGWHITE + bcolors.BOLD + text + bcolors.ENDC)
         return
-    if type == "MESSAGE":
+    if message_type == "MESSAGE":
         print(bcolors.TITLE + bcolors.BOLD + text + bcolors.ENDC + "\n")
         return
-    if type == "INSECURE_WS":
+    if message_type == "INSECURE_WS":
         print(bcolors.OKRED + bcolors.BOLD + text + bcolors.ENDC)
         return
-    if type == "INSECURE":
+    if message_type == "INSECURE":
         print(bcolors.OKRED + bcolors.BOLD + text + bcolors.ENDC + "\n")
         return
-    if type == "OUTPUT":
+    if message_type == "OUTPUT":
         print(bcolors.OKBLUE + bcolors.BOLD + text + bcolors.ENDC + "\n")
         return
-    if type == "OUTPUT_WS":
+    if message_type == "OUTPUT_WS":
         print(bcolors.OKBLUE + bcolors.BOLD + text + bcolors.ENDC)
         return
-    if type == "SECURE":
+    if message_type == "SECURE":
         print(bcolors.OKGREEN + bcolors.BOLD + text + bcolors.ENDC)
 
 

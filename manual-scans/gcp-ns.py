@@ -21,17 +21,19 @@ def vulnerable_ns(domain_name):
 
         try:
             ns_records = dns.resolver.resolve(domain_name, "NS")
+            if len(ns_records) == 0:
+                return True
+
             if len(ns_records) > 0:
                 return False
-
-            else:
-                return True
 
         except dns.resolver.NoNameservers:
             return True
 
     except dns.resolver.NoAnswer:
         return False
+
+    return False
 
 
 class gcp:
@@ -54,22 +56,23 @@ class gcp:
                 dns_record_client = google.cloud.dns.zone.ManagedZone(name=managed_zone.name, client=dns_client)
 
                 if dns_record_client.list_resource_record_sets():
-                    resource_record_sets = dns_record_client.list_resource_record_sets()
+
+                    records = dns_record_client.list_resource_record_sets()
+                    resource_record_sets = [
+                        r for r in records if "NS" in r.record_type and r.name != managed_zone.dns_name
+                    ]
 
                     for resource_record_set in resource_record_sets:
-                        # print(resource_record_set.name, resource_record_set.record_type, resource_record_set.rrdatas)
-                        if "NS" in resource_record_set.record_type:
-                            if resource_record_set.name != managed_zone.dns_name:
-                                print(f"Testing {resource_record_set.name} for vulnerability")
-                                i = i + 1
-                                ns_record = resource_record_set.name
-                                result = vulnerable_ns(ns_record)
+                        print(f"Testing {resource_record_set.name} for vulnerability")
+                        i = i + 1
+                        ns_record = resource_record_set.name
+                        result = vulnerable_ns(ns_record)
 
-                                if result:
-                                    vulnerable_domains.append(ns_record)
-                                    my_print(f"{str(i)}. {ns_record}", "ERROR")
-                                else:
-                                    my_print(f"{str(i)}. {ns_record}", "SECURE")
+                        if result:
+                            vulnerable_domains.append(ns_record)
+                            my_print(f"{str(i)}. {ns_record}", "ERROR")
+                        else:
+                            my_print(f"{str(i)}. {ns_record}", "SECURE")
 
         except google.api_core.exceptions.Forbidden:
             pass
