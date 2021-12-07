@@ -24,9 +24,6 @@ def vulnerable_ns(domain_name):
             if len(ns_records) == 0:
                 return True
 
-            if len(ns_records) > 0:
-                return False
-
         except dns.resolver.NoNameservers:
             return True
 
@@ -49,8 +46,6 @@ class gcp:
             managed_zones = dns_client.list_zones()
 
             for managed_zone in managed_zones:
-
-                # print(managed_zone.name, managed_zone.dns_name, managed_zone.description)
                 print(f"Searching for vulnerable NS records in {managed_zone.dns_name}")
 
                 dns_record_client = google.cloud.dns.zone.ManagedZone(name=managed_zone.name, client=dns_client)
