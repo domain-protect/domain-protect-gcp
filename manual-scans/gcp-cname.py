@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-from datetime import datetime
 
 import dns.resolver
 import google.cloud.dns

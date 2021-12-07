@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-from datetime import datetime
 
 import dns.resolver
 import google.cloud.dns
@@ -15,18 +14,18 @@ def vulnerable_ns(domain_name):
     try:
         dns.resolver.resolve(domain_name)
     except dns.resolver.NXDOMAIN:
-        return "False", "\n " + domain_name + " not registered - NXDOMAIN exception"
+        return False
     except dns.resolver.NoNameservers:
         try:
             ns_records = dns.resolver.resolve(domain_name, "NS")
             if len(ns_records) > 0:
-                return "False", ""
+                return False
             else:
-                return "True", "\n No NS records listed for " + domain_name
+                return True
         except:
-            return "True", "\n No NS records found for " + domain_name
+            return True
     except:
-        return "False", ""
+        return False
 
 
 class gcp:
@@ -61,14 +60,13 @@ class gcp:
                                 )
                                 i = i + 1
                                 ns_record = resource_record_set.name
-                                result, exception_message = vulnerable_ns(ns_record)
+                                result = vulnerable_ns(ns_record)
 
-                                if result.startswith("True"):
+                                if result:
                                     vulnerable_domains.append(ns_record)
                                     my_print(str(i) + ". " + ns_record, "ERROR")
                                 else:
                                     my_print(str(i) + ". " + ns_record, "SECURE")
-                                    my_print(exception_message, "INFO")
                 except:
                     pass
         except:

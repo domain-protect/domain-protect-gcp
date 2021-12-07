@@ -22,7 +22,7 @@ jobs:
           command: black --check manual-scans/
       - run:
           name: prospector on manual scans
-          command: prospector manual-scans
+          command: prospector --max-line-length 120 manual-scans 
   terraform_format:
     working_directory: /tmp/project
     docker:
