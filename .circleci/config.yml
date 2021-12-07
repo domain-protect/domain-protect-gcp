@@ -19,10 +19,10 @@ jobs:
           command: pip install -r requirements-dev.txt
       - run:
           name: black on manual scans
-          command: black --check manual-scans/
+          command: black --check --line-length 120 manual-scans/
       - run:
           name: prospector on manual scans
-          command: prospector --max-line-length 120 manual-scans 
+          command: prospector --max-line-length 120 manual-scans/*.py 
   terraform_format:
     working_directory: /tmp/project
     docker:
