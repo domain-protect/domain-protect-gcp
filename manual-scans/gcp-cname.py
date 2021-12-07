@@ -83,16 +83,14 @@ class gcp:
             pass
 
 
-if __name__ == "__main__":
+projects = list_all_projects()
 
-    projects = list_all_projects()
+for project in projects:
+    gcp(project)
 
-    for project in projects:
-        gcp(project)
+count = len(vulnerable_domains)
+my_print("\nTotal Vulnerable Domains Found: " + str(count), "INFOB")
 
-    count = len(vulnerable_domains)
-    my_print("\nTotal Vulnerable Domains Found: " + str(count), "INFOB")
-
-    if count > 0:
-        my_print("List of Vulnerable Domains:", "INFOB")
-        print_list(vulnerable_domains)
+if count > 0:
+    my_print("List of Vulnerable Domains:", "INFOB")
+    print_list(vulnerable_domains)
