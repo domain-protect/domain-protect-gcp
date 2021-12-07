@@ -8,7 +8,7 @@ aliases:
         - main
 
 jobs:
-  python_black:
+  python_tests:
     working_directory: /tmp/project
     docker:
       - image: python:3.8
@@ -20,6 +20,9 @@ jobs:
       - run:
           name: black on manual scans
           command: black --check manual-scans/
+      - run:
+          name: dependency order
+          command: isort --check
   terraform_format:
     working_directory: /tmp/project
     docker:
@@ -79,12 +82,12 @@ jobs:
 workflows:
   cd:
     jobs:
-      - python_black
+      - python_tests
       - terraform_format
       - plan:
           filters: *branch-filter
           requires:
-            - python_black
+            - python_tests
             - terraform_format
       - approve:
           filters: *branch-filter
