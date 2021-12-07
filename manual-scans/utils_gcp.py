@@ -1,6 +1,8 @@
-from google.cloud.resourcemanager_v3 import (FoldersClient,
-                                             OrganizationsClient,
-                                             ProjectsClient)
+from google.cloud.resourcemanager_v3 import (
+    FoldersClient,
+    OrganizationsClient,
+    ProjectsClient,
+)
 
 
 def get_organization_id():

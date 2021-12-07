@@ -21,8 +21,8 @@ jobs:
           name: black on manual scans
           command: black --check manual-scans/
       - run:
-          name: dependency order
-          command: isort --check
+          name: prospector on manual scans
+          command: prospector manual-scans
   terraform_format:
     working_directory: /tmp/project
     docker:
