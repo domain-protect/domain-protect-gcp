@@ -3,7 +3,6 @@ from datetime import datetime
 
 import dns.resolver
 import google.cloud.dns
-
 from utils_gcp import list_all_projects
 from utils_print import my_print, print_list
 

@@ -1,8 +1,13 @@
 #!/usr/bin/env python
 
 from __future__ import print_function
-import os, json, base64
-import urllib.request, urllib.parse
+
+import base64
+import json
+import os
+import urllib.parse
+import urllib.request
+
 
 def notify(event, context):
 
