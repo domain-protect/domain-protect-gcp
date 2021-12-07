@@ -46,14 +46,9 @@ class gcp:
 
             for managed_zone in managed_zones:
                 # print(managed_zone.name, managed_zone.dns_name, managed_zone.description)
-                print(
-                    "Searching for A records with missing storage buckets in "
-                    + managed_zone.dns_name
-                )
+                print("Searching for A records with missing storage buckets in " + managed_zone.dns_name)
 
-                dns_record_client = google.cloud.dns.zone.ManagedZone(
-                    name=managed_zone.name, client=dns_client
-                )
+                dns_record_client = google.cloud.dns.zone.ManagedZone(name=managed_zone.name, client=dns_client)
 
                 try:
                     resource_record_sets = dns_record_client.list_resource_record_sets()

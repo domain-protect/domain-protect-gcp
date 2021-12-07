@@ -29,9 +29,7 @@ def list_projects(parent_id):
     # Lists projects under a parent - requires Folder Viewer role at Organization level
     projects_client = ProjectsClient()
     projects = projects_client.list_projects(parent=parent_id)
-    project_list = [
-        p.project_id for p in projects if not p.project_id.startswith("sys-")
-    ]
+    project_list = [p.project_id for p in projects if not p.project_id.startswith("sys-")]
 
     return project_list
 

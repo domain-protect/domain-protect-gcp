@@ -38,14 +38,9 @@ class gcp:
 
             for managed_zone in managed_zones:
                 # print(managed_zone.name, managed_zone.dns_name, managed_zone.description)
-                print(
-                    "Searching CNAMEs with missing storage buckets in "
-                    + managed_zone.dns_name
-                )
+                print("Searching CNAMEs with missing storage buckets in " + managed_zone.dns_name)
 
-                dns_record_client = google.cloud.dns.zone.ManagedZone(
-                    name=managed_zone.name, client=dns_client
-                )
+                dns_record_client = google.cloud.dns.zone.ManagedZone(name=managed_zone.name, client=dns_client)
 
                 try:
                     resource_record_sets = dns_record_client.list_resource_record_sets()
@@ -54,37 +49,24 @@ class gcp:
                         # print(resource_record_set.name, resource_record_set.record_type, resource_record_set.rrdatas)
                         if "CNAME" in resource_record_set.record_type:
                             if any(
-                                vulnerability in resource_record_set.rrdatas[0]
-                                for vulnerability in vulnerability_list
+                                vulnerability in resource_record_set.rrdatas[0] for vulnerability in vulnerability_list
                             ):
                                 cname_record = resource_record_set.name
                                 cname_value = resource_record_set.rrdatas[0]
-                                print(
-                                    "Testing "
-                                    + resource_record_set.name
-                                    + " for vulnerability"
-                                )
+                                print("Testing " + resource_record_set.name + " for vulnerability")
                                 result = vulnerable_storage(cname_record)
                                 i = i + 1
                                 if result == "True":
                                     vulnerable_domains.append(cname_record)
                                     cname_values.append(cname_value)
                                     my_print(
-                                        str(i)
-                                        + ". "
-                                        + cname_record
-                                        + " CNAME "
-                                        + cname_value,
+                                        str(i) + ". " + cname_record + " CNAME " + cname_value,
                                         "ERROR",
                                     )
                                 elif result == "False":
                                     suspected_domains.append(cname_record)
                                     my_print(
-                                        str(i)
-                                        + ". "
-                                        + cname_record
-                                        + " CNAME "
-                                        + cname_value,
+                                        str(i) + ". " + cname_record + " CNAME " + cname_value,
                                         "SECURE",
                                     )
                                 else:
