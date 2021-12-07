@@ -38,7 +38,7 @@ class gcp:
         managed_zones = dns_client.list_zones()
 
         try:
-            
+
             managed_zones = dns_client.list_zones()
 
             for managed_zone in managed_zones:
@@ -73,7 +73,7 @@ class gcp:
                                     my_print(str(i) + ". " + ns_record, "SECURE")
         except google.api_core.exceptions.Forbidden:
             pass
-        
+
 
 if __name__ == "__main__":
 
