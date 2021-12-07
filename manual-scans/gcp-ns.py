@@ -22,9 +22,9 @@ def vulnerable_ns(domain_name):
                 return False
             else:
                 return True
-        except:
+        except dns.resolver.NoNameservers:
             return True
-    except:
+    except dns.resolver.NoAnswer:
         return False
 
 
@@ -71,6 +71,7 @@ class gcp:
                                     my_print(str(i) + ". " + ns_record, "ERROR")
                                 else:
                                     my_print(str(i) + ". " + ns_record, "SECURE")
+
         except google.api_core.exceptions.Forbidden:
             pass
 
