@@ -33,43 +33,39 @@ class gcp:
             managed_zones = dns_client.list_zones()
 
             for managed_zone in managed_zones:
-                # print(managed_zone.name, managed_zone.dns_name, managed_zone.description)
                 print(f"Searching CNAMEs with missing storage buckets in {managed_zone.dns_name}")
 
                 dns_record_client = google.cloud.dns.zone.ManagedZone(name=managed_zone.name, client=dns_client)
 
-                try:
-                    resource_record_sets = dns_record_client.list_resource_record_sets()
+                if dns_record_client.list_resource_record_sets():
+
+                    records = dns_record_client.list_resource_record_sets()
+                    resource_record_sets = [r for r in records if "CNAME" in r.record_type]
 
                     for resource_record_set in resource_record_sets:
-                        # print(resource_record_set.name, resource_record_set.record_type, resource_record_set.rrdatas)
-                        if "CNAME" in resource_record_set.record_type:
-                            if any(
-                                vulnerability in resource_record_set.rrdatas[0] for vulnerability in vulnerability_list
-                            ):
-                                cname_record = resource_record_set.name
-                                cname_value = resource_record_set.rrdatas[0]
-                                print(f"Testing {resource_record_set.name} for vulnerability")
-                                result = vulnerable_storage(cname_record)
-                                i = i + 1
-                                if result:
-                                    vulnerable_domains.append(cname_record)
-                                    cname_values.append(cname_value)
-                                    my_print(
-                                        f"{str(i)}. {cname_record} CNAME {cname_value}",
-                                        "ERROR",
-                                    )
-                                elif not result:
-                                    suspected_domains.append(cname_record)
-                                    my_print(
-                                        f"{str(i)}. {cname_record} CNAME {cname_value}",
-                                        "SECURE",
-                                    )
-                                else:
-                                    my_print("WARNING: no response from test", "INFOB")
-                except:
-                    pass
-        except:
+                        if any(vulnerability in resource_record_set.rrdatas[0] for vulnerability in vulnerability_list):
+                            cname_record = resource_record_set.name
+                            cname_value = resource_record_set.rrdatas[0]
+                            print(f"Testing {resource_record_set.name} for vulnerability")
+                            result = vulnerable_storage(cname_record)
+                            i = i + 1
+                            if result:
+                                vulnerable_domains.append(cname_record)
+                                cname_values.append(cname_value)
+                                my_print(
+                                    f"{str(i)}. {cname_record} CNAME {cname_value}",
+                                    "ERROR",
+                                )
+                            elif not result:
+                                suspected_domains.append(cname_record)
+                                my_print(
+                                    f"{str(i)}. {cname_record} CNAME {cname_value}",
+                                    "SECURE",
+                                )
+                            else:
+                                my_print("WARNING: no response from test", "INFOB")
+
+        except google.api_core.exceptions.Forbidden:
             pass
 
 
