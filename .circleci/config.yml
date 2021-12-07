@@ -19,7 +19,7 @@ jobs:
           command: pip install -r requirements-dev.txt
       - run:
           name: black on manual scans
-          command: black --check --line-length 120 manual-scans/
+          command: black --check --line-length 120 --verbose manual-scans/
       - run:
           name: prospector on manual scans
           command: prospector --max-line-length 120 manual-scans/*.py 
