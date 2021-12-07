@@ -13,17 +13,23 @@ def vulnerable_ns(domain_name):
 
     try:
         dns.resolver.resolve(domain_name)
+
     except dns.resolver.NXDOMAIN:
         return False
+
     except dns.resolver.NoNameservers:
+
         try:
             ns_records = dns.resolver.resolve(domain_name, "NS")
             if len(ns_records) > 0:
                 return False
+
             else:
                 return True
+
         except dns.resolver.NoNameservers:
             return True
+
     except dns.resolver.NoAnswer:
         return False
 
@@ -38,7 +44,6 @@ class gcp:
         managed_zones = dns_client.list_zones()
 
         try:
-
             managed_zones = dns_client.list_zones()
 
             for managed_zone in managed_zones:
