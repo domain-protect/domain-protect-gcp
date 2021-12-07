@@ -7,7 +7,6 @@ from utils_gcp import list_all_projects
 from utils_print import my_print, print_list
 
 vulnerable_domains = []
-suspected_domains = []
 cname_values = []
 vulnerability_list = [
     "azure",
@@ -20,45 +19,46 @@ vulnerability_list = [
 
 def vulnerable_cname(domain_name):
 
-    global aRecords, isException
-    isException = False
+    global aRecords
+
     try:
         aRecords = dns.resolver.resolve(domain_name, "A")
-        return False, ""
+        return False
+
     except dns.resolver.NXDOMAIN:
         if dns.resolver.resolve(domain_name, "CNAME"):
-            return True, ""
-        else:
-            return False, "\tI: Error fetching CNAME Records for " + domain_name
-    except:
-        return False, ""
+            return True
 
+        else:
+            return False
+    
+    except dns.resolver.NoAnswer:
+        return False
+
+    except dns.resolver.NoNameservers:
+        return False
 
 class gcp:
     def __init__(self, project):
         self.project = project
         i = 0
 
-        print("Searching for Google Cloud DNS hosted zones in " + project + " project")
+        print(f"Searching for Google Cloud DNS hosted zones in {project} project")
         dns_client = google.cloud.dns.client.Client(project=self.project)
         try:
             managed_zones = dns_client.list_zones()
 
             for managed_zone in managed_zones:
                 # print(managed_zone.name, managed_zone.dns_name, managed_zone.description)
-                print(
-                    "Searching for vulnerable CNAME records in " + managed_zone.dns_name
-                )
-
+                print(f"Searching for vulnerable CNAME records in {managed_zone.dns_name}")
                 dns_record_client = google.cloud.dns.zone.ManagedZone(
                     name=managed_zone.name, client=dns_client
                 )
 
-                try:
+                if dns_record_client.list_resource_record_sets():
                     resource_record_sets = dns_record_client.list_resource_record_sets()
 
                     for resource_record_set in resource_record_sets:
-                        # print(resource_record_set.name, resource_record_set.record_type, resource_record_set.rrdatas)
                         if "CNAME" in resource_record_set.record_type:
                             if any(
                                 vulnerability in resource_record_set.rrdatas[0]
@@ -66,50 +66,18 @@ class gcp:
                             ):
                                 cname_record = resource_record_set.name
                                 cname_value = resource_record_set.rrdatas[0]
-                                print(
-                                    "Testing "
-                                    + resource_record_set.name
-                                    + " for vulnerability"
-                                )
-                                result, exception_message = vulnerable_cname(
-                                    cname_record
-                                )
+                                print(f"Testing {resource_record_set.name} for vulnerability")
+                                result = vulnerable_cname(cname_record)
                                 i = i + 1
                                 if result:
                                     vulnerable_domains.append(cname_record)
                                     cname_values.append(cname_value)
-                                    my_print(
-                                        str(i)
-                                        + ". "
-                                        + cname_record
-                                        + " CNAME "
-                                        + cname_value,
-                                        "ERROR",
-                                    )
-                                elif (result == False) and (isException == True):
-                                    suspected_domains.append(cname_record)
-                                    my_print(
-                                        str(i)
-                                        + ". "
-                                        + cname_record
-                                        + " CNAME "
-                                        + cname_value,
-                                        "INFOB",
-                                    )
-                                    my_print(exception_message, "INFO")
+                                    my_print(f"{str(i)}.{cname_record} CNAME {cname_value}", "ERROR")
+                                
                                 else:
-                                    my_print(
-                                        str(i)
-                                        + ". "
-                                        + cname_record
-                                        + " CNAME "
-                                        + cname_value,
-                                        "SECURE",
-                                    )
-                                    my_print(exception_message, "INFO")
-                except:
-                    pass
-        except:
+                                    my_print(f"{str(i)}.{cname_record} CNAME {cname_value}", "SECURE")
+                                    
+        except google.api_core.exceptions.Forbidden:
             pass
 
 

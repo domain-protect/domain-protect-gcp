@@ -39,7 +39,7 @@ class gcp:
         self.project = project
         i = 0
 
-        print("Searching for Google Cloud DNS hosted zones in " + project + " project")
+        print(f"Searching for Google Cloud DNS hosted zones in {project} project")
         dns_client = google.cloud.dns.client.Client(project=self.project)
         managed_zones = dns_client.list_zones()
 
@@ -49,7 +49,7 @@ class gcp:
             for managed_zone in managed_zones:
 
                 # print(managed_zone.name, managed_zone.dns_name, managed_zone.description)
-                print("Searching for vulnerable NS records in " + managed_zone.dns_name)
+                print(f"Searching for vulnerable NS records in {managed_zone.dns_name}")
 
                 dns_record_client = google.cloud.dns.zone.ManagedZone(
                     name=managed_zone.name, client=dns_client
@@ -62,20 +62,16 @@ class gcp:
                         # print(resource_record_set.name, resource_record_set.record_type, resource_record_set.rrdatas)
                         if "NS" in resource_record_set.record_type:
                             if resource_record_set.name != managed_zone.dns_name:
-                                print(
-                                    "Testing "
-                                    + resource_record_set.name
-                                    + " for vulnerability"
-                                )
+                                print(f"Testing {resource_record_set.name} for vulnerability")
                                 i = i + 1
                                 ns_record = resource_record_set.name
                                 result = vulnerable_ns(ns_record)
 
                                 if result:
                                     vulnerable_domains.append(ns_record)
-                                    my_print(str(i) + ". " + ns_record, "ERROR")
+                                    my_print(f"{str(i)}. {ns_record}", "ERROR")
                                 else:
-                                    my_print(str(i) + ". " + ns_record, "SECURE")
+                                    my_print(f"{str(i)}. {ns_record}", "SECURE")
 
         except google.api_core.exceptions.Forbidden:
             pass
@@ -89,7 +85,7 @@ if __name__ == "__main__":
         gcp(project)
 
     count = len(vulnerable_domains)
-    my_print("\nTotal Vulnerable Domains Found: " + str(count), "INFOB")
+    my_print(f"\nTotal Vulnerable Domains Found: {str(count)}", "INFOB")
 
     if count > 0:
         my_print("List of Vulnerable Domains:", "INFOB")
