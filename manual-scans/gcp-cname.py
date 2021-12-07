@@ -42,7 +42,7 @@ def vulnerable_cname(domain_name):
 
 
 def gcp(project):
-    
+
     i = 0
 
     print(f"Searching for Google Cloud DNS hosted zones in {project} project")
