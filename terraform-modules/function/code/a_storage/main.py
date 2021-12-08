@@ -41,7 +41,7 @@ def gcp(project):
 
             dns_record_client = google.cloud.dns.zone.ManagedZone(name=managed_zone.name, client=dns_client)
 
-            try:
+            if dns_record_client.list_resource_record_sets():
                 resource_record_sets = dns_record_client.list_resource_record_sets()
 
                 for resource_record_set in resource_record_sets:
@@ -58,10 +58,8 @@ def gcp(project):
                                         json_data["Findings"].append({"Project": project, "Domain": a_record})
                                 except:
                                     pass
-
-            except:
-                pass
-    except:
+    
+    except google.api_core.exceptions.Forbidden:
         pass
 
 def a_storage(event, context):
@@ -91,7 +89,7 @@ def a_storage(event, context):
             future = publisher.publish(topic_name, data=encoded_data)
             print(f"Message ID {future.result()} published to topic {topic_name}")
 
-        except:
+        except google.api_core.exceptions.Forbidden:
             print(f"ERROR: Unable to publish to PubSub topic {topic_name}")
 
 #uncomment line below for local testing
