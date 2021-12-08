@@ -21,7 +21,6 @@ def vulnerable_storage(domain_name):
     return False
 
 def gcp(project):
-    i=0
 
     print(f"Searching for Google Cloud DNS hosted zones in {project} project")
     dns_client = google.cloud.dns.client.Client(project)
@@ -34,30 +33,29 @@ def gcp(project):
             dns_record_client = google.cloud.dns.zone.ManagedZone(name=managed_zone.name, client=dns_client)
 
             if dns_record_client.list_resource_record_sets():
-                resource_record_sets = dns_record_client.list_resource_record_sets()
-
+                records = dns_record_client.list_resource_record_sets()
+                resource_record_sets = [
+                    r
+                    for r in records
+                    if "CNAME" in r.record_type
+                    and any(vulnerability in r.rrdatas[0] for vulnerability in vulnerability_list)
+                ]
                 for resource_record_set in resource_record_sets:
-                        
-                    if "CNAME" in resource_record_set.record_type:
-                        if any(vulnerability in resource_record_set.rrdatas[0] for vulnerability in vulnerability_list):
-                            cname_record = resource_record_set.name
-                            cname_value = resource_record_set.rrdatas[0]
-                            print(f"Testing {resource_record_set.name} for vulnerability")
-                            try:
-                                result = vulnerable_storage(cname_record)
-                                if result:
-                                    print(f"VULNERABLE: {cname_record}  CNAME {cname_value} in GCP project {project}")
-                                    vulnerable_domains.append(cname_record)
-                                    json_data["Findings"].append({"Project": project, "Domain": cname_record, "CNAME": cname_value})
-                            except:
-                                pass
+                    cname_record = resource_record_set.name
+                    cname_value = resource_record_set.rrdatas[0]
+                    print(f"Testing {resource_record_set.name} for vulnerability")
+                    result = vulnerable_storage(cname_record)
+                    if result:
+                        print(f"VULNERABLE: {cname_record}  CNAME {cname_value} in GCP project {project}")
+                        vulnerable_domains.append(cname_record)
+                        json_data["Findings"].append({"Project": project, "Domain": cname_record, "CNAME": cname_value})
     
     except google.api_core.exceptions.Forbidden:
         pass
 
-def cname_storage(event, context):
-#comment out line above, and uncomment line below for local testing
-#def cname_storage():
+def cname_storage(event, context): # pylint:disable=unused-argument
+    # comment out line above, and uncomment line below for local testing
+    # def cname_storage():
     security_project = os.environ['SECURITY_PROJECT']
     app_name         = os.environ['APP_NAME']
     app_environment  = os.environ['APP_ENVIRONMENT']

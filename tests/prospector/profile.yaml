@@ -1,5 +1,3 @@
-allow-shorthand: false
-
 inherits:
   - strictness_high
 

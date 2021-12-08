@@ -45,28 +45,26 @@ def gcp(project):
 
             dns_record_client = google.cloud.dns.zone.ManagedZone(name=managed_zone.name, client=dns_client)
 
-            if dns_record_client.list_resource_record_sets():
-                resource_record_sets = dns_record_client.list_resource_record_sets()
+            records = dns_record_client.list_resource_record_sets()
+            resource_record_sets = [r for r in records if "NS" in r.record_type and r.name != managed_zone.dns_name]
 
-                for resource_record_set in resource_record_sets:
-                    if "NS" in resource_record_set.record_type:
-                        if resource_record_set.name != managed_zone.dns_name:
-                            print(f"Testing {resource_record_set.name}")
-                            i = i + 1
-                            ns_record = resource_record_set.name
-                            result = vulnerable_ns(ns_record)
+            for resource_record_set in resource_record_sets:
+                if resource_record_set.name != managed_zone.dns_name:
+                    print(f"Testing {resource_record_set.name}")
+                    ns_record = resource_record_set.name
+                    result = vulnerable_ns(ns_record)
 
-                            if result:
-                                print(f"VULNERABLE DOMAIN: {ns_record}")
-                                vulnerable_domains.append(ns_record)
-                                json_data["Findings"].append({"Project": project, "Domain": ns_record})
+                    if result:
+                        print(f"VULNERABLE DOMAIN: {ns_record}")
+                        vulnerable_domains.append(ns_record)
+                        json_data["Findings"].append({"Project": project, "Domain": ns_record})
     
     except google.api_core.exceptions.Forbidden:
         pass
 
-def ns(event, context):
-#comment out line above, and uncomment line below for local testing
-#def ns():
+def ns(event, context): # pylint:disable=unused-argument
+    # comment out line above, and uncomment line below for local testing
+    # def ns():
     security_project = os.environ['SECURITY_PROJECT']
     app_name         = os.environ['APP_NAME']
     app_environment  = os.environ['APP_ENVIRONMENT']
