@@ -33,7 +33,6 @@ def vulnerable_ns(domain_name):
     
 
 def gcp(project):
-    i=0
 
     print(f"Searching for Google Cloud DNS hosted zones in {project} project")
     dns_client = google.cloud.dns.client.Client(project)
@@ -74,9 +73,16 @@ def ns(event, context): # pylint:disable=unused-argument
     global json_data
     json_data = {"Findings": [], "Subject": "Vulnerable NS subdomain records found in Google Cloud DNS"}
 
+    start_time = datetime.now()
     projects = list_all_projects()
+    total_projects = len(projects)
+    scanned_projects = 0
     for project in projects:
         gcp(project)
+        scanned_projects = scanned_projects + 1
+
+    scan_time = datetime.now() - start_time
+    print(f"Scanned {str(scanned_projects)} of {str(total_projects)} projects in {scan_time.seconds} seconds")
 
     if len(vulnerable_domains) > 0:
         try:

@@ -77,9 +77,16 @@ def cname(event, context): # pylint:disable=unused-argument
     global json_data
     json_data                = {"Findings": [], "Subject": "Vulnerable CNAME records in Google Cloud DNS"}
 
+    start_time = datetime.now()
     projects = list_all_projects()
+    total_projects = len(projects)
+    scanned_projects = 0
     for project in projects:
         gcp(project)
+        scanned_projects = scanned_projects + 1
+
+    scan_time = datetime.now() - start_time
+    print(f"Scanned {str(scanned_projects)} of {str(total_projects)} projects in {scan_time.seconds} seconds")
 
     if len(vulnerable_domains) > 0:
         try:
