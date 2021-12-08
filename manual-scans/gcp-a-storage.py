@@ -1,9 +1,11 @@
+from datetime import datetime
+
 import google.cloud.dns
 import requests
-
 from utils_gcp import list_all_projects
 from utils_print import my_print, print_list
 
+start_time = datetime.now()
 vulnerable_domains = []
 suspected_domains = []
 cname_values = []
@@ -71,9 +73,15 @@ def gcp(project):
 if __name__ == "__main__":
 
     projects = list_all_projects()
+    total_projects = len(projects)
+    scanned_projects = 0
 
     for project in projects:
         gcp(project)
+        scanned_projects = scanned_projects + 1
+
+    scan_time = datetime.now() - start_time
+    print(f"Scanned {str(scanned_projects)} of {str(total_projects)} projects in {scan_time.seconds} seconds")
 
     count = len(vulnerable_domains)
     my_print("\nTotal Vulnerable Domains Found: " + str(count), "INFOB")
