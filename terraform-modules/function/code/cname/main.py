@@ -8,66 +8,61 @@ from google.cloud import pubsub_v1
 from utils import list_all_projects
 
 
-def json_serial(obj):
-    """JSON serializer for objects not serializable by default json code"""
-
-    if isinstance(obj, datetime):
-        serial = obj.isoformat()
-        return serial
-    raise TypeError("Type not serializable")
-
 def vulnerable_cname(domain_name):
 
+    global aRecords
+
     try:
-        dns.resolver.resolve(domain_name, 'A')
-        return "False"
+        aRecords = dns.resolver.resolve(domain_name, "A")
+        return False
+
     except dns.resolver.NXDOMAIN:
-        if dns.resolver.resolve(domain_name, 'CNAME'):
-            return "True"
-        else:
-            return "False"
-    except:
-        return "False"
-
-class gcp:
-    def __init__(self, project):
-        self.project = project
-        i=0
-
-        print("Searching for Google Cloud DNS hosted zones in " + project + " project")
-        dns_client = google.cloud.dns.client.Client(project=self.project)
         try:
-            managed_zones = dns_client.list_zones()
+            dns.resolver.resolve(domain_name, "CNAME")
+            return True
 
-            for managed_zone in managed_zones:
-                #print(managed_zone.name, managed_zone.dns_name, managed_zone.description)
-                print("Searching for vulnerable CNAME records in " + managed_zone.dns_name)
+        except dns.resolver.NoNameservers:
+            return False
 
-                dns_record_client = google.cloud.dns.zone.ManagedZone(name=managed_zone.name, client=dns_client)
+    except (dns.resolver.NoAnswer, dns.resolver.NoNameservers):
+        return False
+        
 
-                try:
-                    resource_record_sets = dns_record_client.list_resource_record_sets()
+def gcp(project):
+    i=0
 
-                    for resource_record_set in resource_record_sets:
-                        #print(resource_record_set.name, resource_record_set.record_type, resource_record_set.rrdatas)
-                        if "CNAME" in resource_record_set.record_type:
-                            if any(vulnerability in resource_record_set.rrdatas[0] for vulnerability in vulnerability_list):
-                                cname_record = resource_record_set.name
-                                cname_value = resource_record_set.rrdatas[0]
-                                print("Testing " + resource_record_set.name + " for vulnerability")
-                                try:
-                                    result = vulnerable_cname(cname_record)
-                                    if result == "True":
-                                        print("VULNERABLE: " + cname_record + "  CNAME  " + cname_value + " in GCP project " + project)
-                                        vulnerable_domains.append(cname_record)
-                                        json_data["Findings"].append({"Project": project, "Domain": cname_record, "CNAME": cname_value})
-                                except:
-                                    pass
+    print("Searching for Google Cloud DNS hosted zones in " + project + " project")
+    dns_client = google.cloud.dns.client.Client(project)
+    try:
+        managed_zones = dns_client.list_zones()
 
-                except:
-                    pass
-        except:
-            pass
+        for managed_zone in managed_zones:
+            print("Searching for vulnerable CNAME records in " + managed_zone.dns_name)
+
+            dns_record_client = google.cloud.dns.zone.ManagedZone(name=managed_zone.name, client=dns_client)
+
+            try:
+                resource_record_sets = dns_record_client.list_resource_record_sets()
+
+                for resource_record_set in resource_record_sets:
+                    if "CNAME" in resource_record_set.record_type:
+                        if any(vulnerability in resource_record_set.rrdatas[0] for vulnerability in vulnerability_list):
+                            cname_record = resource_record_set.name
+                            cname_value = resource_record_set.rrdatas[0]
+                            print("Testing " + resource_record_set.name + " for vulnerability")
+                            try:
+                                result = vulnerable_cname(cname_record)
+                                if result:
+                                    print("VULNERABLE: " + cname_record + "  CNAME  " + cname_value + " in GCP project " + project)
+                                    vulnerable_domains.append(cname_record)
+                                    json_data["Findings"].append({"Project": project, "Domain": cname_record, "CNAME": cname_value})
+                            except:
+                                pass
+
+            except:
+                pass
+    except:
+        pass
 
 def cname(event, context):
 #comment out line above, and uncomment line below for local testing

@@ -7,70 +7,64 @@ import google.cloud.dns
 from google.cloud import pubsub_v1
 from utils import list_all_projects
 
-def json_serial(obj):
-    """JSON serializer for objects not serializable by default json code"""
-
-    if isinstance(obj, datetime):
-        serial = obj.isoformat()
-        return serial
-    raise TypeError("Type not serializable")
 
 def vulnerable_ns(domain_name):
 
     try:
         dns.resolver.resolve(domain_name)
+
     except dns.resolver.NXDOMAIN:
-        return "False", "\n "+ domain_name +" not registered - NXDOMAIN exception"
+        return False
+
     except dns.resolver.NoNameservers:
+
         try:
-            ns_records = dns.resolver.resolve(domain_name, 'NS')
-            if len(ns_records) > 0:
-                return "False", ""
-            else:
-                return "True", "\n No NS records listed for " + domain_name
-        except:
-            return "True", "\n No NS records found for " + domain_name
+            ns_records = dns.resolver.resolve(domain_name, "NS")
+            if len(ns_records) == 0:
+                return True
+
+        except dns.resolver.NoNameservers:
+            return True
+
+    except dns.resolver.NoAnswer:
+        return False
+
+    return False
+    
+
+def gcp(project):
+    i=0
+
+    print("Searching for Google Cloud DNS hosted zones in " + project + " project")
+    dns_client = google.cloud.dns.client.Client(project)
+    try:
+        managed_zones = dns_client.list_zones()
+
+        for managed_zone in managed_zones:
+            print("Searching for vulnerable NS records in " + managed_zone.dns_name)
+
+            dns_record_client = google.cloud.dns.zone.ManagedZone(name=managed_zone.name, client=dns_client)
+
+            try:
+                resource_record_sets = dns_record_client.list_resource_record_sets()
+
+                for resource_record_set in resource_record_sets:
+                    if "NS" in resource_record_set.record_type:
+                        if resource_record_set.name != managed_zone.dns_name:
+                            print("Testing " + resource_record_set.name)
+                            i = i + 1
+                            ns_record = resource_record_set.name
+                            result = vulnerable_ns(ns_record)
+
+                            if result:
+                                print("VULNERABLE DOMAIN: " + ns_record)
+                                vulnerable_domains.append(ns_record)
+                                json_data["Findings"].append({"Project": project, "Domain": ns_record})
+                                
+            except:
+                pass
     except:
-        return "False", ""
-
-class gcp:
-    def __init__(self, project):
-        self.project = project
-        i=0
-
-        print("Searching for Google Cloud DNS hosted zones in " + project + " project")
-        dns_client = google.cloud.dns.client.Client(project=self.project)
-        try:
-            managed_zones = dns_client.list_zones()
-
-            for managed_zone in managed_zones:
-                #print(managed_zone.name, managed_zone.dns_name, managed_zone.description)
-                print("Searching for vulnerable NS records in " + managed_zone.dns_name)
-
-                dns_record_client = google.cloud.dns.zone.ManagedZone(name=managed_zone.name, client=dns_client)
-
-                try:
-                    resource_record_sets = dns_record_client.list_resource_record_sets()
-
-                    for resource_record_set in resource_record_sets:
-                        #print(resource_record_set.name, resource_record_set.record_type, resource_record_set.rrdatas)
-                        if "NS" in resource_record_set.record_type:
-                            if resource_record_set.name != managed_zone.dns_name:
-                                print("Testing " + resource_record_set.name)
-                                i = i + 1
-                                ns_record = resource_record_set.name
-                                result, exception_message = vulnerable_ns(ns_record)
-
-                                if result.startswith("True"):
-                                    print("VULNERABLE DOMAIN: " + ns_record)
-                                    vulnerable_domains.append(ns_record)
-                                    json_data["Findings"].append({"Project": project, "Domain": ns_record})
-                                #else:
-                                    #print(ns_record + "is not vulnerable")
-                except:
-                    pass
-        except:
-            pass
+        pass
 
 def ns(event, context):
 #comment out line above, and uncomment line below for local testing

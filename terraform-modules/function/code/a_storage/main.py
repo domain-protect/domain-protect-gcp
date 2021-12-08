@@ -8,79 +8,61 @@ from google.cloud import pubsub_v1
 from utils import list_all_projects
 
 
-def json_serial(obj):
-    """JSON serializer for objects not serializable by default json code"""
-
-    if isinstance(obj, datetime):
-        serial = obj.isoformat()
-        return serial
-    raise TypeError("Type not serializable")
-
 def vulnerable_storage(domain_name):
 
     try:
-        response = requests.get('https://' + domain_name, timeout=0.3)
-
+        response = requests.get("https://" + domain_name, timeout=1)
         if "NoSuchBucket" in response.text:
-            return "True"
+            return True
 
-        else:
-            return "False"
-
-    except:
+    except (requests.exceptions.SSLError, requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout):
         pass
 
     try:
-        response = requests.get('http://' + domain_name, timeout=0.3)
-
+        response = requests.get("http://" + domain_name, timeout=1)
         if "NoSuchBucket" in response.text:
-            return "True"
+            return True
 
-        else:
-            return "False"
+    except (requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout):
+        pass
 
+    return False
+
+def gcp(project):
+    i=0
+
+    print("Searching for Google Cloud DNS hosted zones in " + project + " project")
+    dns_client = google.cloud.dns.client.Client(project)
+    try:
+        managed_zones = dns_client.list_zones()
+
+        for managed_zone in managed_zones:
+            print("Searching for vulnerable A records in " + managed_zone.dns_name)
+
+            dns_record_client = google.cloud.dns.zone.ManagedZone(name=managed_zone.name, client=dns_client)
+
+            try:
+                resource_record_sets = dns_record_client.list_resource_record_sets()
+
+                for resource_record_set in resource_record_sets:
+                    if resource_record_set.record_type in "A":
+                        for ip_address in resource_record_set.rrdatas:
+                            if not ip_address.startswith("10."):
+                                a_record = resource_record_set.name
+                                print("Testing " + a_record + " for vulnerability")
+                                try:
+                                    result = vulnerable_storage(a_record)
+                                    if result:
+                                        print("VULNERABLE: " + a_record + " in GCP project " + project)
+                                        vulnerable_domains.append(a_record)
+                                        json_data["Findings"].append({"Project": project, "Domain": a_record})
+                                except:
+                                    pass
+
+            except:
+                pass
     except:
-        return "False"
-
-class gcp:
-    def __init__(self, project):
-        self.project = project
-        i=0
-
-        print("Searching for Google Cloud DNS hosted zones in " + project + " project")
-        dns_client = google.cloud.dns.client.Client(project=self.project)
-        try:
-            managed_zones = dns_client.list_zones()
-
-            for managed_zone in managed_zones:
-                #print(managed_zone.name, managed_zone.dns_name, managed_zone.description)
-                print("Searching for vulnerable A records in " + managed_zone.dns_name)
-
-                dns_record_client = google.cloud.dns.zone.ManagedZone(name=managed_zone.name, client=dns_client)
-
-                try:
-                    resource_record_sets = dns_record_client.list_resource_record_sets()
-
-                    for resource_record_set in resource_record_sets:
-                        #print(resource_record_set.name, resource_record_set.record_type, resource_record_set.rrdatas)
-                        if resource_record_set.record_type in "A":
-                            for ip_address in resource_record_set.rrdatas:
-                                if not ip_address.startswith("10."):
-                                    a_record = resource_record_set.name
-                                    print("Testing " + a_record + " for vulnerability")
-                                    try:
-                                        result = vulnerable_storage(a_record)
-                                        if result == "True":
-                                            print("VULNERABLE: " + a_record + " in GCP project " + project)
-                                            vulnerable_domains.append(a_record)
-                                            json_data["Findings"].append({"Project": project, "Domain": a_record})
-                                    except:
-                                        pass
-
-                except:
-                    pass
-        except:
-            pass
+        pass
 
 def a_storage(event, context):
 #comment out line above, and uncomment line below for local testing
