@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-from datetime import datetime
-
 import dns.resolver
 import google.cloud.dns
 
@@ -14,77 +11,71 @@ def vulnerable_ns(domain_name):
 
     try:
         dns.resolver.resolve(domain_name)
+
     except dns.resolver.NXDOMAIN:
-        return "False", "\n " + domain_name + " not registered - NXDOMAIN exception"
+        return False
+
     except dns.resolver.NoNameservers:
+
         try:
             ns_records = dns.resolver.resolve(domain_name, "NS")
-            if len(ns_records) > 0:
-                return "False", ""
-            else:
-                return "True", "\n No NS records listed for " + domain_name
-        except:
-            return "True", "\n No NS records found for " + domain_name
-    except:
-        return "False", ""
+            if len(ns_records) == 0:
+                return True
+
+        except dns.resolver.NoNameservers:
+            return True
+
+    except dns.resolver.NoAnswer:
+        return False
+
+    return False
 
 
-class gcp:
-    def __init__(self, project):
-        self.project = project
-        i = 0
+def gcp(project):
 
-        print("Searching for Google Cloud DNS hosted zones in " + project + " project")
-        dns_client = google.cloud.dns.client.Client(project=self.project)
-        try:
-            managed_zones = dns_client.list_zones()
+    i = 0
 
-            for managed_zone in managed_zones:
-                # print(managed_zone.name, managed_zone.dns_name, managed_zone.description)
-                print("Searching for vulnerable NS records in " + managed_zone.dns_name)
+    print(f"Searching for Google Cloud DNS hosted zones in {project} project")
+    dns_client = google.cloud.dns.client.Client(project)
+    managed_zones = dns_client.list_zones()
 
-                dns_record_client = google.cloud.dns.zone.ManagedZone(
-                    name=managed_zone.name, client=dns_client
-                )
+    try:
+        managed_zones = dns_client.list_zones()
 
-                try:
-                    resource_record_sets = dns_record_client.list_resource_record_sets()
+        for managed_zone in managed_zones:
+            print(f"Searching for vulnerable NS records in {managed_zone.dns_name}")
 
-                    for resource_record_set in resource_record_sets:
-                        # print(resource_record_set.name, resource_record_set.record_type, resource_record_set.rrdatas)
-                        if "NS" in resource_record_set.record_type:
-                            if resource_record_set.name != managed_zone.dns_name:
-                                print(
-                                    "Testing "
-                                    + resource_record_set.name
-                                    + " for vulnerability"
-                                )
-                                i = i + 1
-                                ns_record = resource_record_set.name
-                                result, exception_message = vulnerable_ns(ns_record)
+            dns_record_client = google.cloud.dns.zone.ManagedZone(name=managed_zone.name, client=dns_client)
 
-                                if result.startswith("True"):
-                                    vulnerable_domains.append(ns_record)
-                                    my_print(str(i) + ". " + ns_record, "ERROR")
-                                else:
-                                    my_print(str(i) + ". " + ns_record, "SECURE")
-                                    my_print(exception_message, "INFO")
-                except:
-                    pass
-        except:
-            pass
+            if dns_record_client.list_resource_record_sets():
+
+                records = dns_record_client.list_resource_record_sets()
+                resource_record_sets = [r for r in records if "NS" in r.record_type and r.name != managed_zone.dns_name]
+
+                for resource_record_set in resource_record_sets:
+                    print(f"Testing {resource_record_set.name} for vulnerability")
+                    i = i + 1
+                    ns_record = resource_record_set.name
+                    result = vulnerable_ns(ns_record)
+
+                    if result:
+                        vulnerable_domains.append(ns_record)
+                        my_print(f"{str(i)}. {ns_record}", "ERROR")
+                    else:
+                        my_print(f"{str(i)}. {ns_record}", "SECURE")
+
+    except google.api_core.exceptions.Forbidden:
+        pass
 
 
-if __name__ == "__main__":
+projects = list_all_projects()
 
-    projects = list_all_projects()
+for project in projects:
+    gcp(project)
 
-    for project in projects:
-        gcp(project)
+count = len(vulnerable_domains)
+my_print(f"\nTotal Vulnerable Domains Found: {str(count)}", "INFOB")
 
-    count = len(vulnerable_domains)
-    my_print("\nTotal Vulnerable Domains Found: " + str(count), "INFOB")
-
-    if count > 0:
-        my_print("List of Vulnerable Domains:", "INFOB")
-        print_list(vulnerable_domains)
+if count > 0:
+    my_print("List of Vulnerable Domains:", "INFOB")
+    print_list(vulnerable_domains)

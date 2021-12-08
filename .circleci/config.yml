@@ -8,10 +8,10 @@ aliases:
         - main
 
 jobs:
-  python_black:
+  python_tests:
     working_directory: /tmp/project
     docker:
-      - image: python:3.8
+      - image: python:3.9
     steps:
       - checkout
       - run:
@@ -19,7 +19,10 @@ jobs:
           command: pip install -r requirements-dev.txt
       - run:
           name: black on manual scans
-          command: black --check manual-scans/
+          command: black --check --line-length 120 manual-scans/
+      - run:
+          name: prospector on manual scans
+          command: prospector --max-line-length 120 --profile tests/prospector/profile.yaml manual-scans/*.py
   terraform_format:
     working_directory: /tmp/project
     docker:
@@ -79,12 +82,12 @@ jobs:
 workflows:
   cd:
     jobs:
-      - python_black
+      - python_tests
       - terraform_format
       - plan:
           filters: *branch-filter
           requires:
-            - python_black
+            - python_tests
             - terraform_format
       - approve:
           filters: *branch-filter

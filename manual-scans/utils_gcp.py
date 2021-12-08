@@ -20,9 +20,7 @@ def list_folders(parent_id):
     # Lists folders under a parent - requires Folder Viewer role at Organization level
     folders_client = FoldersClient()
     folders = folders_client.list_folders(parent=parent_id)
-    folder_list = []
-    for folder in folders:
-        folder_list.append(folder.name)
+    folder_list = [f.name for f in folders]
 
     return folder_list
 
@@ -31,10 +29,7 @@ def list_projects(parent_id):
     # Lists projects under a parent - requires Folder Viewer role at Organization level
     projects_client = ProjectsClient()
     projects = projects_client.list_projects(parent=parent_id)
-    project_list = []
-    for project in projects:
-        if "sys-" not in project.project_id:
-            project_list.append(project.project_id)
+    project_list = [p.project_id for p in projects if not p.project_id.startswith("sys-")]
 
     return project_list
 
