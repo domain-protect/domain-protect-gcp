@@ -1,17 +1,11 @@
-#!/usr/bin/env python
-# for local testing:
-# pip install google-cloud-dns
-# pip install google-cloud-pubsub
-# pip install google-cloud-resource-manager
-# pip install dnspython
 import json
 import os
 from datetime import datetime
 
 import dns.resolver
 import google.cloud.dns
-from google.cloud import pubsub_v1, resource_manager
-
+from google.cloud import pubsub_v1
+from utils import list_all_projects
 
 def json_serial(obj):
     """JSON serializer for objects not serializable by default json code"""
@@ -90,10 +84,9 @@ def ns(event, context):
     global json_data
     json_data                = {"Findings": [], "Subject": "Vulnerable NS subdomain records found in Google Cloud DNS"}
 
-    client = resource_manager.Client()
-    for project in client.list_projects():
-        if "sys-" not in project.project_id:
-            gcp(project.name)
+    projects = list_all_projects()
+    for project in projects:
+        gcp(project)
 
     if len(vulnerable_domains) > 0:
         try:
