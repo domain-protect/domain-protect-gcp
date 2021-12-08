@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 import dns.resolver
 import google.cloud.dns
 
@@ -28,9 +26,10 @@ def vulnerable_cname(domain_name):
     except dns.resolver.NXDOMAIN:
         try:
             dns.resolver.resolve(domain_name, "CNAME")
+            return True
 
         except dns.resolver.NoNameservers:
-            return True
+            return False
 
     except dns.resolver.NoAnswer:
         return False

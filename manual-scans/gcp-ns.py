@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 import dns.resolver
 import google.cloud.dns
 
