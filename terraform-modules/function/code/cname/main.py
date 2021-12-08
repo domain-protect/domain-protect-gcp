@@ -31,13 +31,13 @@ def vulnerable_cname(domain_name):
 def gcp(project):
     i=0
 
-    print("Searching for Google Cloud DNS hosted zones in " + project + " project")
+    print(f"Searching for Google Cloud DNS hosted zones in {project} project")
     dns_client = google.cloud.dns.client.Client(project)
     try:
         managed_zones = dns_client.list_zones()
 
         for managed_zone in managed_zones:
-            print("Searching for vulnerable CNAME records in " + managed_zone.dns_name)
+            print(f"Searching for vulnerable CNAME records in {managed_zone.dns_name}")
 
             dns_record_client = google.cloud.dns.zone.ManagedZone(name=managed_zone.name, client=dns_client)
 
@@ -49,11 +49,11 @@ def gcp(project):
                         if any(vulnerability in resource_record_set.rrdatas[0] for vulnerability in vulnerability_list):
                             cname_record = resource_record_set.name
                             cname_value = resource_record_set.rrdatas[0]
-                            print("Testing " + resource_record_set.name + " for vulnerability")
+                            print(f"Testing {resource_record_set.name} for vulnerability")
                             try:
                                 result = vulnerable_cname(cname_record)
                                 if result:
-                                    print("VULNERABLE: " + cname_record + "  CNAME  " + cname_value + " in GCP project " + project)
+                                    print(f"VULNERABLE: {cname_record}  CNAME {cname_value} in GCP project {project}")
                                     vulnerable_domains.append(cname_record)
                                     json_data["Findings"].append({"Project": project, "Domain": cname_record, "CNAME": cname_value})
                             except:
@@ -87,15 +87,15 @@ def cname(event, context):
         try:
             #print(json.dumps(json_data, sort_keys=True, indent=2, default=json_serial))
             publisher = pubsub_v1.PublisherClient()
-            topic_name = 'projects/' + security_project + '/topics/' + app_name + '-results-' + app_environment
+            topic_name = f"projects/{security_project}/topics/{app_name}-results-{app_environment}"
             data=json.dumps(json_data)
 
             encoded_data = data.encode('utf-8')
             future = publisher.publish(topic_name, data=encoded_data)
-            print("Message ID " + future.result() + " published to topic projects/" + security_project + "/topics/" + app_name + "-results-" + app_environment)
+            print(f"Message ID {future.result()} published to topic {topic_name}")
 
         except:
-            print("ERROR: Unable to publish to PubSub topic projects/" + security_project + "/topics/" + app_name + "-results-" + app_environment)
+            print(f"ERROR: Unable to publish to PubSub topic {topic_name}")
 
 #uncomment line below for local testing
 #cname()

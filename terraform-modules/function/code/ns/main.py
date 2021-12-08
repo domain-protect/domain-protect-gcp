@@ -35,13 +35,13 @@ def vulnerable_ns(domain_name):
 def gcp(project):
     i=0
 
-    print("Searching for Google Cloud DNS hosted zones in " + project + " project")
+    print(f"Searching for Google Cloud DNS hosted zones in {project} project")
     dns_client = google.cloud.dns.client.Client(project)
     try:
         managed_zones = dns_client.list_zones()
 
         for managed_zone in managed_zones:
-            print("Searching for vulnerable NS records in " + managed_zone.dns_name)
+            print(f"Searching for vulnerable NS records in {managed_zone.dns_name}")
 
             dns_record_client = google.cloud.dns.zone.ManagedZone(name=managed_zone.name, client=dns_client)
 
@@ -51,13 +51,13 @@ def gcp(project):
                 for resource_record_set in resource_record_sets:
                     if "NS" in resource_record_set.record_type:
                         if resource_record_set.name != managed_zone.dns_name:
-                            print("Testing " + resource_record_set.name)
+                            print(f"Testing {resource_record_set.name}")
                             i = i + 1
                             ns_record = resource_record_set.name
                             result = vulnerable_ns(ns_record)
 
                             if result:
-                                print("VULNERABLE DOMAIN: " + ns_record)
+                                print(f"VULNERABLE DOMAIN: {ns_record}")
                                 vulnerable_domains.append(ns_record)
                                 json_data["Findings"].append({"Project": project, "Domain": ns_record})
                                 
@@ -74,9 +74,9 @@ def ns(event, context):
     app_environment  = os.environ['APP_ENVIRONMENT']
 
     global vulnerable_domains
-    vulnerable_domains       = []
+    vulnerable_domains = []
     global json_data
-    json_data                = {"Findings": [], "Subject": "Vulnerable NS subdomain records found in Google Cloud DNS"}
+    json_data = {"Findings": [], "Subject": "Vulnerable NS subdomain records found in Google Cloud DNS"}
 
     projects = list_all_projects()
     for project in projects:
@@ -84,17 +84,16 @@ def ns(event, context):
 
     if len(vulnerable_domains) > 0:
         try:
-            #print(json.dumps(json_data, sort_keys=True, indent=2, default=json_serial))
             publisher = pubsub_v1.PublisherClient()
-            topic_name = 'projects/' + security_project + '/topics/' + app_name + '-results-' + app_environment
+            topic_name = f"projects/{security_project}/topics/{app_name}-results-{app_environment}"
             data=json.dumps(json_data)
 
             encoded_data = data.encode('utf-8')
             future = publisher.publish(topic_name, data=encoded_data)
-            print("Message ID " + future.result() + " published to topic projects/" + security_project + "/topics/" + app_name + "-results-" + app_environment)
+            print(f"Message ID {future.result()} published to topic {topic_name}")
 
         except:
-            print("ERROR: Unable to publish to PubSub topic projects/" + security_project + "/topics/" + app_name + "-results-" + app_environment)
+            print(f"ERROR: Unable to publish to PubSub topic {topic_name}")
 
 #uncomment line below for local testing
 #ns()
