@@ -5,6 +5,7 @@ from datetime import datetime
 import dns.resolver
 import google.cloud.dns
 from google.cloud import pubsub_v1
+
 from utils import list_all_projects
 
 
@@ -75,14 +76,13 @@ def ns(event, context): # pylint:disable=unused-argument
 
     start_time = datetime.now()
     projects = list_all_projects()
-    total_projects = len(projects)
     scanned_projects = 0
     for project in projects:
         gcp(project)
         scanned_projects = scanned_projects + 1
 
     scan_time = datetime.now() - start_time
-    print(f"Scanned {str(scanned_projects)} of {str(total_projects)} projects in {scan_time.seconds} seconds")
+    print(f"Scanned {str(scanned_projects)} of {str(len(projects))} projects in {scan_time.seconds} seconds")
 
     if len(vulnerable_domains) > 0:
         try:

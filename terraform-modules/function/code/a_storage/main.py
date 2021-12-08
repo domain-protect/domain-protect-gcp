@@ -5,7 +5,9 @@ from datetime import datetime
 import google.cloud.dns
 import requests
 from google.cloud import pubsub_v1
+
 from utils import list_all_projects
+
 
 def vulnerable_storage(domain_name):
 
@@ -67,20 +69,19 @@ def a_storage(event, context): # pylint:disable=unused-argument
     app_environment  = os.environ['APP_ENVIRONMENT']
 
     global vulnerable_domains
-    vulnerable_domains       = []
+    vulnerable_domains = []
     global json_data
-    json_data                = {"Findings": [], "Subject": "Vulnerable A record in Google Cloud DNS - missing storage bucket"}
+    json_data = {"Findings": [], "Subject": "Vulnerable A record in Google Cloud DNS - missing storage bucket"}
 
     start_time = datetime.now()
     projects = list_all_projects()
-    total_projects = len(projects)
     scanned_projects = 0
     for project in projects:
         gcp(project)
         scanned_projects = scanned_projects + 1
 
     scan_time = datetime.now() - start_time
-    print(f"Scanned {str(scanned_projects)} of {str(total_projects)} projects in {scan_time.seconds} seconds")
+    print(f"Scanned {str(scanned_projects)} of {str(len(projects))} projects in {scan_time.seconds} seconds")
 
     if len(vulnerable_domains) > 0:
         try:
