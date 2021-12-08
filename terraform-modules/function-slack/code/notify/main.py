@@ -51,7 +51,7 @@ def notify(event, context):
                     }
                 )
 
-            except:
+            except KeyError:
                 print(f"VULNERABLE: {finding['Domain']} in GCP Project {finding['Project']}")
                 slack_message["fields"].append(
                     {"value": finding["Domain"] + " in GCP Project " + finding["Project"], "short": False}
