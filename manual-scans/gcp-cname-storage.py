@@ -12,9 +12,13 @@ vulnerability_list = ["amazonaws.com", "cloudfront.net", "c.storage.googleapis.c
 
 def vulnerable_storage(domain_name):
 
-    response = requests.get(f"http://{domain_name}", timeout=1)
-    if "NoSuchBucket" in response.text:
-        return True
+    try:
+        response = requests.get(f"http://{domain_name}", timeout=1)
+        if "NoSuchBucket" in response.text:
+            return True
+
+    except (requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout):
+        pass
 
     return False
 
