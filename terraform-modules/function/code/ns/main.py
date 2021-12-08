@@ -31,7 +31,7 @@ def vulnerable_ns(domain_name):
         return False
 
     return False
-    
+
 
 def gcp(project):
 
@@ -58,16 +58,17 @@ def gcp(project):
                         print(f"VULNERABLE DOMAIN: {ns_record}")
                         vulnerable_domains.append(ns_record)
                         json_data["Findings"].append({"Project": project, "Domain": ns_record})
-    
+
     except google.api_core.exceptions.Forbidden:
         pass
 
-def ns(event, context): # pylint:disable=unused-argument
+
+def ns(event, context):  # pylint:disable=unused-argument
     # comment out line above, and uncomment line below for local testing
     # def ns():
-    security_project = os.environ['SECURITY_PROJECT']
-    app_name         = os.environ['APP_NAME']
-    app_environment  = os.environ['APP_ENVIRONMENT']
+    security_project = os.environ["SECURITY_PROJECT"]
+    app_name = os.environ["APP_NAME"]
+    app_environment = os.environ["APP_ENVIRONMENT"]
 
     global vulnerable_domains
     vulnerable_domains = []
@@ -88,14 +89,15 @@ def ns(event, context): # pylint:disable=unused-argument
         try:
             publisher = pubsub_v1.PublisherClient()
             topic_name = f"projects/{security_project}/topics/{app_name}-results-{app_environment}"
-            data=json.dumps(json_data)
+            data = json.dumps(json_data)
 
-            encoded_data = data.encode('utf-8')
+            encoded_data = data.encode("utf-8")
             future = publisher.publish(topic_name, data=encoded_data)
             print(f"Message ID {future.result()} published to topic {topic_name}")
 
         except google.api_core.exceptions.Forbidden:
             print(f"ERROR: Unable to publish to PubSub topic {topic_name}")
 
-#uncomment line below for local testing
-#ns()
+
+# uncomment line below for local testing
+# ns()

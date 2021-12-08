@@ -27,7 +27,7 @@ def vulnerable_cname(domain_name):
 
     except (dns.resolver.NoAnswer, dns.resolver.NoNameservers):
         return False
-        
+
 
 def gcp(project):
 
@@ -59,16 +59,17 @@ def gcp(project):
                         print(f"VULNERABLE: {cname_record}  CNAME {cname_value} in GCP project {project}")
                         vulnerable_domains.append(cname_record)
                         json_data["Findings"].append({"Project": project, "Domain": cname_record, "CNAME": cname_value})
-    
+
     except google.api_core.exceptions.Forbidden:
         pass
 
-def cname(event, context): # pylint:disable=unused-argument
+
+def cname(event, context):  # pylint:disable=unused-argument
     # comment out line above, and uncomment line below for local testing
     # def cname():
-    security_project = os.environ['SECURITY_PROJECT']
-    app_name         = os.environ['APP_NAME']
-    app_environment  = os.environ['APP_ENVIRONMENT']
+    security_project = os.environ["SECURITY_PROJECT"]
+    app_name = os.environ["APP_NAME"]
+    app_environment = os.environ["APP_ENVIRONMENT"]
 
     global vulnerability_list
     vulnerability_list = ["azure", ".cloudapp.net", "core.windows.net", "elasticbeanstalk.com", "trafficmanager.net"]
@@ -90,17 +91,18 @@ def cname(event, context): # pylint:disable=unused-argument
 
     if len(vulnerable_domains) > 0:
         try:
-            #print(json.dumps(json_data, sort_keys=True, indent=2, default=json_serial))
+            # print(json.dumps(json_data, sort_keys=True, indent=2, default=json_serial))
             publisher = pubsub_v1.PublisherClient()
             topic_name = f"projects/{security_project}/topics/{app_name}-results-{app_environment}"
-            data=json.dumps(json_data)
+            data = json.dumps(json_data)
 
-            encoded_data = data.encode('utf-8')
+            encoded_data = data.encode("utf-8")
             future = publisher.publish(topic_name, data=encoded_data)
             print(f"Message ID {future.result()} published to topic {topic_name}")
 
         except google.api_core.exceptions.Forbidden:
             print(f"ERROR: Unable to publish to PubSub topic {topic_name}")
 
-#uncomment line below for local testing
-#cname()
+
+# uncomment line below for local testing
+# cname()
