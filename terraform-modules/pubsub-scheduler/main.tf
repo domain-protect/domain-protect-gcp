@@ -15,7 +15,7 @@ resource "google_cloud_scheduler_job" "functions" {
   name        = "${var.name}-${local.env}"
   region      = var.app_service_region
   description = "Schedule for ${var.name} functions"
-  schedule    = var.schedule
+  schedule    = local.env == "dev" ? var.schedule_dev : var.schedule
   time_zone   = var.time_zone
 
   pubsub_target {
