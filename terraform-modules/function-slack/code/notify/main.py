@@ -17,9 +17,7 @@ def notify(event, context):
     slack_emoji = os.environ["SLACK_EMOJI"]
 
     print(
-        """Function triggered by messageId {} published at {} to {} """.format(
-            context.event_id, context.timestamp, context.resource["name"]
-        )
+        f"Function triggered by messageId {context.event_id} at {context.timestamp} to {context.resource['name']}"
     )
 
     if "data" in event:
@@ -61,4 +59,6 @@ def notify(event, context):
 
         data = urllib.parse.urlencode({"payload": json.dumps(payload)}).encode("utf-8")
         req = urllib.request.Request(slack_url)
-        urllib.request.urlopen(req, data)
+        
+        with urllib.request.urlopen(req, data):
+            print(f"Message sent to {slack_channel}")
