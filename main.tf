@@ -22,6 +22,7 @@ module "pubsub-scheduler" {
   project            = var.project
   time_zone          = var.time_zone
   schedule           = var.schedule
+  schedule_dev       = var.schedule_dev
   depends_on         = [module.services.cloud_scheduler_service_id]
 }
 

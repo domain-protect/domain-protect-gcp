@@ -1,6 +1,7 @@
 import json
 import os
 from datetime import datetime
+from time import sleep
 
 import dns.resolver
 import google.cloud.dns
@@ -79,6 +80,7 @@ def cname(event, context):  # pylint:disable=unused-argument
     global json_data
     json_data = {"Findings": [], "Subject": "Vulnerable CNAME records in Google Cloud DNS"}
 
+    sleep(30)  # staggers scan time from scheduler to reduce concurrent API usage
     start_time = datetime.now()
     projects = list_all_projects()
     scanned_projects = 0

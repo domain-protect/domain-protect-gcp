@@ -77,6 +77,11 @@ variable "schedule" {
   default     = "0 9 * * *" #fire at 9 a.m. every day
 }
 
+variable "schedule_dev" {
+  description = "Schedule for triggering development functions in CRON syntax"
+  default     = "0 8 * * *" #fire at 8 a.m. every day
+}
+
 variable "available_memory" {
   description = "Available memory for function"
   default     = 1024
