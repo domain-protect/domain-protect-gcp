@@ -16,9 +16,7 @@ def notify(event, context):
     slack_username = os.environ["SLACK_USERNAME"]
     slack_emoji = os.environ["SLACK_EMOJI"]
 
-    print(
-        f"Function triggered by messageId {context.event_id} at {context.timestamp} to {context.resource['name']}"
-    )
+    print(f"Function triggered by messageId {context.event_id} at {context.timestamp} to {context.resource['name']}")
 
     if "data" in event:
         pubsub_message = base64.b64decode(event["data"]).decode("utf-8")
@@ -59,6 +57,6 @@ def notify(event, context):
 
         data = urllib.parse.urlencode({"payload": json.dumps(payload)}).encode("utf-8")
         req = urllib.request.Request(slack_url)
-        
+
         with urllib.request.urlopen(req, data):
-            print(f"Message sent to {slack_channel}")
+            print(f"Message sent to {slack_channel} Slack channel")
