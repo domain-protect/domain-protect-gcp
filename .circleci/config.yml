@@ -8,10 +8,34 @@ aliases:
         - main
 
 jobs:
+  python_tests:
+    working_directory: /tmp/project
+    docker:
+      - image: python:3.9
+    steps:
+      - checkout
+      - run:
+          name: install dependencies
+          command: pip install -r requirements-dev.txt
+      - run:
+          name: black on manual scans
+          command: black --check --line-length 120 .
+      - run:
+          name: prospector on manual scans
+          command: prospector --max-line-length 120 --profile tests/prospector/profile.yaml
+  terraform_format:
+    working_directory: /tmp/project
+    docker:
+      - image: hashicorp/terraform:1.0.11
+    steps:
+      - checkout
+      - run:
+          name: terraform format
+          command: terraform fmt -check -recursive
   plan:
     working_directory: /tmp/project
     docker:
-      - image: hashicorp/terraform:1.0.0
+      - image: hashicorp/terraform:1.0.11
     steps:
       - checkout
       - run:
@@ -43,7 +67,7 @@ jobs:
             - .
   apply:
     docker:
-      - image: hashicorp/terraform:1.0.0
+      - image: hashicorp/terraform:1.0.11
     steps:
       - attach_workspace:
           at: .
@@ -58,8 +82,13 @@ jobs:
 workflows:
   cd:
     jobs:
+      - python_tests
+      - terraform_format
       - plan:
           filters: *branch-filter
+          requires:
+            - python_tests
+            - terraform_format
       - approve:
           filters: *branch-filter
           type: approval
