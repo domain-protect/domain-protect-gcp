@@ -8,6 +8,12 @@ module "iam" {
   depends_on = [module.services.iam_service_id]
 }
 
+module "pubsub-projects" {
+  source  = "./terraform-modules/pubsub-projects"
+  name    = var.name
+  project = var.project
+}
+
 module "pubsub-results" {
   source  = "./terraform-modules/pubsub-results"
   name    = var.name
@@ -32,6 +38,20 @@ module "storage" {
   region = var.region
 }
 
+module "function-projects" {
+  source                = "./terraform-modules/function-projects"
+  name                  = var.name
+  project               = var.project
+  region                = var.region
+  bucket_name           = module.storage.bucket_name
+  timeout               = var.timeout
+  ingress_settings      = var.ingress_settings
+  runtime               = var.runtime
+  pubsub_topic          = module.pubsub-scheduler.pubsub_topic_name
+  service_account_email = module.iam.service_account_email
+  depends_on            = [module.services.cloud_functions_service_id, module.services.cloud_build_service_id]
+}
+
 module "function" {
   source                = "./terraform-modules/function"
   functions             = var.functions
@@ -43,7 +63,7 @@ module "function" {
   timeout               = var.timeout
   ingress_settings      = var.ingress_settings
   runtime               = var.runtime
-  pubsub_topic          = module.pubsub-scheduler.pubsub_topic_name
+  pubsub_topic          = module.pubsub-projects.pubsub_topic_name
   service_account_email = module.iam.service_account_email
   depends_on            = [module.services.cloud_functions_service_id, module.services.cloud_build_service_id]
 }

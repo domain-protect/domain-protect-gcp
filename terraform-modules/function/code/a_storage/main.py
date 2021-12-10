@@ -1,12 +1,10 @@
+import base64
 import json
 import os
-from datetime import datetime
 
 import google.cloud.dns
 import requests
 from google.cloud import pubsub_v1
-
-from utils import list_all_projects
 
 
 def vulnerable_storage(domain_name):
@@ -75,29 +73,28 @@ def a_storage(event, context):  # pylint:disable=unused-argument
     global json_data
     json_data = {"Findings": [], "Subject": "Vulnerable A record in Google Cloud DNS - missing storage bucket"}
 
-    start_time = datetime.now()
-    projects = list_all_projects()
-    scanned_projects = 0
-    for project in projects:
-        gcp(project)
-        scanned_projects = scanned_projects + 1
+    if "data" in event:
+        pubsub_message = base64.b64decode(event["data"]).decode("utf-8")
+        projects_json = json.loads(pubsub_message)
+        projects = projects_json["Projects"]
+        scanned_projects = 0
+        for project in projects:
+            gcp(project)
+            scanned_projects = scanned_projects + 1
 
-    scan_time = datetime.now() - start_time
-    print(f"Scanned {str(scanned_projects)} of {str(len(projects))} projects in {scan_time.seconds} seconds")
+        print(f"Scanned {str(scanned_projects)} of {str(len(projects))} projects")
 
-    if len(vulnerable_domains) > 0:
-        try:
-            # print(json.dumps(json_data, sort_keys=True, indent=2, default=json_serial))
-            publisher = pubsub_v1.PublisherClient()
-            topic_name = f"projects/{security_project}/topics/{app_name}-results-{app_environment}"
-            data = json.dumps(json_data)
+        if len(vulnerable_domains) > 0:
+            try:
+                # print(json.dumps(json_data, sort_keys=True, indent=2, default=json_serial))
+                publisher = pubsub_v1.PublisherClient()
+                topic_name = f"projects/{security_project}/topics/{app_name}-results-{app_environment}"
+                encoded_data = json.dumps(json_data).encode("utf-8")
+                future = publisher.publish(topic_name, data=encoded_data)
+                print(f"Message ID {future.result()} published to topic {topic_name}")
 
-            encoded_data = data.encode("utf-8")
-            future = publisher.publish(topic_name, data=encoded_data)
-            print(f"Message ID {future.result()} published to topic {topic_name}")
-
-        except google.api_core.exceptions.Forbidden:
-            print(f"ERROR: Unable to publish to PubSub topic {topic_name}")
+            except google.api_core.exceptions.Forbidden:
+                print(f"ERROR: Unable to publish to PubSub topic {topic_name}")
 
 
 # uncomment line below for local testing
