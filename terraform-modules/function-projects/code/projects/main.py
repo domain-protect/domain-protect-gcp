@@ -1,14 +1,17 @@
-from google.cloud.resourcemanager_v3 import (
-    FoldersClient,
-    OrganizationsClient,
-    ProjectsClient,
-)
+#!/usr/bin/env python
+
+import json
+import os
+
+import google.cloud.resourcemanager_v3
+
+from google.cloud import pubsub_v1
 
 
 def get_organization_id():
     # Gets organization ID - service account must only have rights to a single org
     # Requires Organization Viewer role at Organization level
-    organizations_client = OrganizationsClient()
+    organizations_client = google.cloud.resourcemanager_v3.OrganizationsClient()
     orgs = organizations_client.search_organizations()
     for org in orgs:
         return org.name
@@ -18,7 +21,7 @@ def get_organization_id():
 
 def list_folders(parent_id):
     # Lists folders under a parent - requires Folder Viewer role at Organization level
-    folders_client = FoldersClient()
+    folders_client = google.cloud.resourcemanager_v3.FoldersClient()
     folders = folders_client.list_folders(parent=parent_id)
     folder_list = [f.name for f in folders]
 
@@ -27,14 +30,18 @@ def list_folders(parent_id):
 
 def list_projects(parent_id):
     # Lists projects under a parent - requires Folder Viewer role at Organization level
-    projects_client = ProjectsClient()
+    projects_client = google.cloud.resourcemanager_v3.ProjectsClient()
     projects = projects_client.list_projects(parent=parent_id)
     project_list = [p.project_id for p in projects if not p.project_id.startswith("sys-")]
 
     return project_list
 
 
-def list_all_projects():
+def projects(event, context):  # pylint:disable=unused-argument
+    security_project = os.environ["SECURITY_PROJECT"]
+    app_name = os.environ["APP_NAME"]
+    app_environment = os.environ["APP_ENVIRONMENT"]
+
     # Get organization ID
     org_id = get_organization_id()
 
@@ -67,4 +74,17 @@ def list_all_projects():
             all_projects.extend(p for p in projects_under_folder)
 
     # Finally, return all the projects
-    return all_projects
+    # return all_projects
+
+    print(f"Found {len(all_projects)} Projects in Organization")
+
+    if len(all_projects) > 0:
+        try:
+            publisher = pubsub_v1.PublisherClient()
+            topic_name = f"projects/{security_project}/topics/{app_name}-projects-{app_environment}"
+            data = json.dumps({"Projects": all_projects})
+            future = publisher.publish(topic_name, data=data.encode("utf-8"))
+            print(f"Message ID {future.result()} published to topic {topic_name}")
+
+        except google.api_core.exceptions.Forbidden:
+            print(f"ERROR: Unable to publish to PubSub topic {topic_name}")

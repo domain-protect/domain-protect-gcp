@@ -1,0 +1,9 @@
+variable "project" {}
+variable "region" {}
+variable "name" {}
+variable "bucket_name" {}
+variable "ingress_settings" {}
+variable "runtime" {}
+variable "timeout" {}
+variable "pubsub_topic" {}
+variable "service_account_email" {}
