@@ -82,19 +82,6 @@ Organization Viewer (roles/resourcemanager.organizationViewer)
 * add an extra webhook URL or repeat the same webhook URL to your slack_webhook_urls variable list
 * apply Terraform
 
-## developing new checks
-* New checks can be tested locally from your laptop
-* Log in to GCP using ```gcloud auth login```
-* Ensure you have installed the relevant Python modules locally or in your virtual environment using ```pip install```
-* Export environment variables from your command line, e.g. 
-```
-export SECURITY_PROJECT=mygcpproject896783
-export APP_NAME=domain-protect
-export APP_ENVIRONMENT=dev
-```
-* Temporarily comment out and uncomment lines as detailed in the code
-* Revert after successful local testing
-
 ## ci/cd
 * infrastructure has been deployed using CircleCI
 * environment variables to be entered in CircleCI project settings:
@@ -109,6 +96,15 @@ export APP_ENVIRONMENT=dev
 | TF_VAR_slack_channels           | ["security-alerts"]                              |
 | TF_VAR_slack_channels_dev       | ["security-alerts-dev"]                          |
 | TF_VAR_slack_webhook_urls       | ["https://hooks.slack.com/services/XXX/XXX/XXX"] | 
+
+## local development
+
+* Python and Terraform local tests:
+```
+black --check --line-length 120 .
+prospector --max-line-length 120 --profile tests/prospector/profile.yaml
+terraform fmt -check -recursive
+```
 
 * to validate an updated CircleCI configuration:
 ```

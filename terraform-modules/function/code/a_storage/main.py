@@ -62,8 +62,7 @@ def gcp(project):
 
 
 def a_storage(event, context):  # pylint:disable=unused-argument
-    # comment out line above, and uncomment line below for local testing
-    # def a_storage():
+
     security_project = os.environ["SECURITY_PROJECT"]
     app_name = os.environ["APP_NAME"]
     app_environment = os.environ["APP_ENVIRONMENT"]
@@ -86,7 +85,6 @@ def a_storage(event, context):  # pylint:disable=unused-argument
 
         if len(vulnerable_domains) > 0:
             try:
-                # print(json.dumps(json_data, sort_keys=True, indent=2, default=json_serial))
                 publisher = pubsub_v1.PublisherClient()
                 topic_name = f"projects/{security_project}/topics/{app_name}-results-{app_environment}"
                 encoded_data = json.dumps(json_data).encode("utf-8")
@@ -95,7 +93,3 @@ def a_storage(event, context):  # pylint:disable=unused-argument
 
             except google.api_core.exceptions.Forbidden:
                 print(f"ERROR: Unable to publish to PubSub topic {topic_name}")
-
-
-# uncomment line below for local testing
-# a_storage()
