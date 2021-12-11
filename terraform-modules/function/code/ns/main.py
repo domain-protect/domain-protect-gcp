@@ -62,8 +62,7 @@ def gcp(project):
 
 
 def ns(event, context):  # pylint:disable=unused-argument
-    # comment out line above, and uncomment line below for local testing
-    # def ns():
+
     security_project = os.environ["SECURITY_PROJECT"]
     app_name = os.environ["APP_NAME"]
     app_environment = os.environ["APP_ENVIRONMENT"]
@@ -94,7 +93,3 @@ def ns(event, context):  # pylint:disable=unused-argument
 
             except google.api_core.exceptions.Forbidden:
                 print(f"ERROR: Unable to publish to PubSub topic {topic_name}")
-
-
-# uncomment line below for local testing
-# ns()
