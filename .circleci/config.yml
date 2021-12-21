@@ -18,15 +18,15 @@ jobs:
           name: install dependencies
           command: pip install -r requirements-dev.txt
       - run:
-          name: black on manual scans
+          name: black
           command: black --check --line-length 120 .
       - run:
-          name: prospector on manual scans
-          command: prospector --max-line-length 120 --profile tests/prospector/profile.yaml
+          name: prospector
+          command: prospector
   terraform_format:
     working_directory: /tmp/project
     docker:
-      - image: hashicorp/terraform:1.0.11
+      - image: hashicorp/terraform:1.1.2
     steps:
       - checkout
       - run:
@@ -35,7 +35,7 @@ jobs:
   plan:
     working_directory: /tmp/project
     docker:
-      - image: hashicorp/terraform:1.0.11
+      - image: hashicorp/terraform:1.1.2
     steps:
       - checkout
       - run:
@@ -67,7 +67,7 @@ jobs:
             - .
   apply:
     docker:
-      - image: hashicorp/terraform:1.0.11
+      - image: hashicorp/terraform:1.1.2
     steps:
       - attach_workspace:
           at: .
