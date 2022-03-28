@@ -120,6 +120,7 @@ workflows:
           requires:
             - python_tests
             - terraform_format
+            - sast_terraform
       - approve:
           filters: *branch-filter
           type: approval
