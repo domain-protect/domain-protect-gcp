@@ -103,7 +103,9 @@ Organization Viewer (roles/resourcemanager.organizationViewer)
 ```
 black --check --line-length 120 .
 prospector --max-line-length 120 --profile tests/prospector/profile.yaml
+bandit --ini .config/sast_python_bandit_cli.yml manual-scans terraform-modules
 terraform fmt -check -recursive
+checkov --config-file .config/sast_terraform_checkov_cli.yml --directory
 ```
 
 * to validate an updated CircleCI configuration:
