@@ -50,6 +50,9 @@ jobs:
             bandit --version
             which bandit
       - run:
+          name: prepare reports dir
+          command: mkdir --parents ~/reports_sast_python/
+      - run:
           name: generate json report
           command: >
             bandit
@@ -78,6 +81,9 @@ jobs:
             echo $PATH
             checkov --version
             which checkov
+      - run:
+          name: prepare reports dir
+          command: mkdir --parents ~/reports_sast_terraform/
       - run:
           name: generate json report
           command: >
