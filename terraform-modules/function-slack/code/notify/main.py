@@ -15,9 +15,7 @@ def notify(event, context):
     slack_username = os.environ["SLACK_USERNAME"]
     slack_emoji = os.environ["SLACK_EMOJI"]
 
-    print(
-        f"Function triggered by messageId {context.event_id} at {context.timestamp} to {context.resource['name']}"
-    )
+    print(f"Function triggered by messageId {context.event_id} at {context.timestamp} to {context.resource['name']}")
 
     if "data" in event:
         pubsub_message = base64.b64decode(event["data"]).decode("utf-8")
@@ -43,29 +41,19 @@ def notify(event, context):
 
             try:
                 cname = finding["CNAME"]
-                print(
-                    f"VULNERABLE: {finding['Domain']}  CNAME  {cname} in GCP Project {finding['Project']}"
-                )
+                print(f"VULNERABLE: {finding['Domain']}  CNAME  {cname} in GCP Project {finding['Project']}")
                 slack_message["fields"].append(
                     {
-                        "value": finding["Domain"]
-                        + "  CNAME  "
-                        + cname
-                        + " in GCP Project "
-                        + finding["Project"],
+                        "value": finding["Domain"] + "  CNAME  " + cname + " in GCP Project " + finding["Project"],
                         "short": False,
                     }
                 )
 
             except KeyError:
-                print(
-                    f"VULNERABLE: {finding['Domain']} in GCP Project {finding['Project']}"
-                )
+                print(f"VULNERABLE: {finding['Domain']} in GCP Project {finding['Project']}")
                 slack_message["fields"].append(
                     {
-                        "value": finding["Domain"]
-                        + " in GCP Project "
-                        + finding["Project"],
+                        "value": finding["Domain"] + " in GCP Project " + finding["Project"],
                         "short": False,
                     }
                 )
@@ -78,8 +66,7 @@ def notify(event, context):
         )
         if response.status_code != 200:
             ValueError(
-                "Request to slack returned an error %s, the response is:\n%s"
-                % (response.status_code, response.text)
+                "Request to slack returned an error %s, the response is:\n%s" % (response.status_code, response.text)
             )
         else:
             print(f"Message sent to {slack_channel} Slack channel")
