@@ -65,8 +65,6 @@ def notify(event, context):
             headers={"Content-Type": "application/json"},
         )
         if response.status_code != 200:
-            ValueError(
-                f"Request to Slack returned error {response.status_code}:\n{response.text}"
-            )
+            ValueError(f"Request to Slack returned error {response.status_code}:\n{response.text}")
         else:
             print(f"Message sent to {slack_channel} Slack channel")
