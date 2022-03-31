@@ -50,12 +50,14 @@ jobs:
             bandit --version
             which bandit
       - run:
-          name: generate & upload json report
+          name: generate json report
           command: >
             bandit
             --exit-zero
             --ini .config/sast_python_bandit_json.yml <<parameters.rootdir>>
-            1> sast_python_${RANDOM}.json
+            1> ~/reports_sast_python/${RANDOM}.json
+      - store_artifacts:
+          path: ../reports_sast_python/
       - run:
           name: test code
           command: >
@@ -77,12 +79,14 @@ jobs:
             checkov --version
             which checkov
       - run:
-          name: generate & upload json report
+          name: generate json report
           command: >
             checkov
             --config-file .config/sast_terraform_checkov_json.yml
             --directory <<parameters.rootdir>>
-            1> sast_terraform_${RANDOM}.json
+            1> ~/reports_sast_terraform/${RANDOM}.json
+      - store_artifacts:
+          path: ../reports_sast_terraform/
       - run:
           name: test code
           command: >
