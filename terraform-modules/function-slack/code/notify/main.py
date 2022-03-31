@@ -5,8 +5,7 @@ from __future__ import print_function
 import base64
 import json
 import os
-import urllib.parse
-import urllib.request
+import requests
 
 
 def notify(event, context):
@@ -33,7 +32,10 @@ def notify(event, context):
             "text": json_data["Subject"],
         }
 
-        slack_message = {"fallback": "A new message", "fields": [{"title": "Vulnerable domains"}]}
+        slack_message = {
+            "fallback": "A new message",
+            "fields": [{"title": "Vulnerable domains"}],
+        }
 
         for finding in findings:
 
@@ -50,13 +52,19 @@ def notify(event, context):
             except KeyError:
                 print(f"VULNERABLE: {finding['Domain']} in GCP Project {finding['Project']}")
                 slack_message["fields"].append(
-                    {"value": finding["Domain"] + " in GCP Project " + finding["Project"], "short": False}
+                    {
+                        "value": finding["Domain"] + " in GCP Project " + finding["Project"],
+                        "short": False,
+                    }
                 )
 
         payload["attachments"].append(slack_message)
-
-        data = urllib.parse.urlencode({"payload": json.dumps(payload)}).encode("utf-8")
-        req = urllib.request.Request(slack_url)
-
-        with urllib.request.urlopen(req, data):
+        response = requests.post(
+            slack_url,
+            data=json.dumps(payload),
+            headers={"Content-Type": "application/json"},
+        )
+        if response.status_code != 200:
+            ValueError(f"Request to Slack returned error {response.status_code}:\n{response.text}")
+        else:
             print(f"Message sent to {slack_channel} Slack channel")
