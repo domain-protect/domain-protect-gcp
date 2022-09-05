@@ -12,6 +12,12 @@
   <img src="images/slack-gcp.png" width="500">
 </kbd>
 
+### deploy in your GCP Organization using GitHub Actions
+
+<kbd>
+  <img src="images/deploy-pipeline.png" width="500">
+</kbd>
+
 ### or manually scan from your laptop
 
 ![Alt text](manual-scans/images/gcp-cname.png?raw=true "Detect vulnerable ElasticBeanstalk CNAMEs")
@@ -83,19 +89,22 @@ Organization Viewer (roles/resourcemanager.organizationViewer)
 * apply Terraform
 
 ## ci/cd
-* infrastructure has been deployed using CircleCI
-* environment variables to be entered in CircleCI project settings:
+* infrastructure deployed using GitHub Actions
+* use separate deployment repository [domain-protect-gcp-deploy](https://github.com/domain-protect/domain-protect-gcp-deploy)
+* use OpenID Connect, service account keys not required
+* configuration details provided at [domain-protect-gcp-deploy](https://github.com/domain-protect/domain-protect-gcp-deploy)
 
-| ENVIRONMENT VARIABLE            | EXAMPLE VALUE / COMMENT                          |
-| ------------------------------- | -------------------------------------------------|
-| GOOGLE_CLOUD_KEYFILE_JSON       | JSON keyfile downloaded from GCP console         |
-| GOOGLE_APPLICATION_CREDENTIALS  | google_cloud_keyfile.json                        | 
-| TERRAFORM_STATE_BUCKET          | tfstate78936                                     |
-| TERRAFORM_STATE_PREFIX          | terraform/state/domain-protect-gcp               |
-| TF_VAR_project                  | mycoolgcpproject                                 |       
-| TF_VAR_slack_channels           | ["security-alerts"]                              |
-| TF_VAR_slack_channels_dev       | ["security-alerts-dev"]                          |
-| TF_VAR_slack_webhook_urls       | ["https://hooks.slack.com/services/XXX/XXX/XXX"] | 
+| GITHUB ACTIONS SECRETS             | EXAMPLE                                                                         |
+|--------------------------------|------------------------------------------------------------------------------------------------|
+| GCP_WORKLOAD_IDENTITY_PROVIDER | projects/123456789/locations/global/workloadIdentityPools/github-actions/providers/domain-protect-gcp-github |
+| GCP_SERVICE_ACCOUNT            | my-service-account@my-project.iam.gserviceaccount.com                                          |
+| TERRAFORM_STATE_BUCKET         | tfstate48903                                                                                   |
+| TERRAFORM_STATE_PREFIX         | terraform/state/domain-protect-gcp                                                                             |                                                               |                                  |
+| SLACK_CHANNELS                 | ["security-alerts"]                                                                            |
+| SLACK_CHANNELS_DEV             | ["security-alerts-dev"]                                                                        |
+| SLACK_WEBHOOK_URLS             | ["https://hooks.slack.com/services/XXX/XXX/XXX"]                                               |
+| TF_VAR_project                 | mygcpprojectid                                                                                 |
+
 
 ## local development
 
@@ -106,11 +115,6 @@ prospector --max-line-length 120 --profile tests/prospector/profile.yaml
 bandit --ini .config/sast_python_bandit_cli.yml manual-scans terraform-modules
 terraform fmt -check -recursive
 checkov --config-file .config/sast_terraform_checkov_cli.yml --directory
-```
-
-* to validate an updated CircleCI configuration:
-```
-docker run -v `pwd`:/whatever circleci/circleci-cli circleci config validate /whatever/.circleci/config.yml
 ```
 
 ## limitations
