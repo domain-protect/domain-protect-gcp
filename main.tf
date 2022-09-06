@@ -86,3 +86,13 @@ module "function-slack" {
   slack_username        = var.slack_username
   depends_on            = [module.services.cloud_functions_service_id, module.services.cloud_build_service_id]
 }
+
+module "secret-manager" {
+  for_each = local.secrets
+
+  source       = "./terraform-modules/secret-manager"
+  app_name     = var.name
+  secret_name  = each.key
+  secret_value = each.value
+  depends_on   = [module.services.secret_manager_service_id]
+}
