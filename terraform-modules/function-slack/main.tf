@@ -13,9 +13,8 @@ resource "google_storage_bucket_object" "function" {
 }
 
 resource "google_cloudfunctions_function" "function" {
-  count                 = length(var.slack_channels)
-  name                  = "${var.name}-notify-${var.slack_channels[count.index]}-${local.env}"
-  description           = "${var.name} Slack notification function to ${var.slack_channels[count.index]} channel in ${local.env} environment"
+  name                  = "${var.name}-notify-${var.slack_channel}-${local.env}"
+  description           = "${var.name} Slack notification function to ${var.slack_channel} channel in ${local.env} environment"
   source_archive_bucket = var.bucket_name
   source_archive_object = google_storage_bucket_object.function.name
   timeout               = var.timeout
@@ -25,12 +24,15 @@ resource "google_cloudfunctions_function" "function" {
   ingress_settings      = var.ingress_settings
 
   environment_variables = {
-    ENVIRONMENT    = local.env
-    NAME           = var.name
-    PROJECT_NUMBER = var.project_number
-    SLACK_CHANNEL  = element(var.slack_channels, count.index)
+    SLACK_CHANNEL  = var.slack_channel
     SLACK_USERNAME = var.slack_username
     SLACK_EMOJI    = var.slack_emoji
+  }
+
+  secret_environment_variables {
+    key     = "SLACK_URL"
+    secret  = local.secret_id
+    version = local.secret_version
   }
 
   event_trigger {

@@ -53,6 +53,7 @@ Cloud Scheduler Admin
 Create Service Accounts
 Project IAM Admin
 Pub/Sub Admin
+Secret Manager Admin
 Service Account Admin
 Service Account User
 Service Usage Admin

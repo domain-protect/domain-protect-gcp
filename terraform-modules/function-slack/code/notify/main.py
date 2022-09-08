@@ -7,29 +7,13 @@ import json
 import os
 import requests
 
-from google.cloud import secretmanager
-
-
-def get_webhook(slack_channel):
-
-    environment = os.environ["ENVIRONMENT"]
-    name = os.environ["NAME"]
-    project_number = os.environ["PROJECT_NUMBER"]
-
-    secrets = secretmanager.SecretManagerServiceClient()
-    webhook = secrets.access_secret_version(
-        f"projects/{project_number}/secrets/{name}-{slack_channel}-{environment}"
-    ).payload.data.decode("utf-8")
-
-    return webhook
-
 
 def notify(event, context):
 
     slack_channel = os.environ["SLACK_CHANNEL"]
     slack_username = os.environ["SLACK_USERNAME"]
     slack_emoji = os.environ["SLACK_EMOJI"]
-    slack_url = get_webhook(slack_channel)
+    slack_url = os.environ["SLACK_URL"]
 
     print(f"Function triggered by messageId {context.event_id} at {context.timestamp} to {context.resource['name']}")
 
