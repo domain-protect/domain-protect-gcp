@@ -25,10 +25,12 @@ resource "google_cloudfunctions_function" "function" {
   ingress_settings      = var.ingress_settings
 
   environment_variables = {
-    SLACK_CHANNEL     = element(var.slack_channels, count.index)
-    SLACK_WEBHOOK_URL = element(var.slack_webhook_urls, count.index)
-    SLACK_USERNAME    = var.slack_username
-    SLACK_EMOJI       = var.slack_emoji
+    ENVIRONMENT    = local.env
+    NAME           = var.name
+    PROJECT_NUMBER = var.project_number
+    SLACK_CHANNEL  = element(var.slack_channels, count.index)
+    SLACK_USERNAME = var.slack_username
+    SLACK_EMOJI    = var.slack_emoji
   }
 
   event_trigger {

@@ -73,6 +73,7 @@ module "function-slack" {
   functions             = var.functions
   name                  = var.name
   project               = var.project
+  project_number        = data.google_project.project.number
   region                = var.region
   bucket_name           = module.storage.bucket_name
   timeout               = var.timeout

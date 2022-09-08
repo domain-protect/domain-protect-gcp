@@ -1,4 +1,5 @@
 variable "project" {}
+variable "project_number" {}
 variable "region" {}
 variable "name" {}
 variable "bucket_name" {}
