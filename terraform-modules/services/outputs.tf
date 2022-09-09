@@ -17,3 +17,7 @@ output "iam_service_id" {
 output "cloud_build_service_id" {
   value = google_project_service.cloud_build.id
 }
+
+output "secret_manager_service_id" {
+  value = google_project_service.secret_manager.id
+}

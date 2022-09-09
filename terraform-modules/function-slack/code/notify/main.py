@@ -10,10 +10,10 @@ import requests
 
 def notify(event, context):
 
-    slack_url = os.environ["SLACK_WEBHOOK_URL"]
     slack_channel = os.environ["SLACK_CHANNEL"]
     slack_username = os.environ["SLACK_USERNAME"]
     slack_emoji = os.environ["SLACK_EMOJI"]
+    slack_url = os.environ["SLACK_URL"]
 
     print(f"Function triggered by messageId {context.event_id} at {context.timestamp} to {context.resource['name']}")
 

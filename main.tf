@@ -5,6 +5,7 @@ module "services" {
 module "iam" {
   source     = "./terraform-modules/iam"
   name       = var.name
+  project    = var.project
   depends_on = [module.services.iam_service_id]
 }
 
@@ -69,8 +70,9 @@ module "function" {
 }
 
 module "function-slack" {
+  for_each = toset(local.slack_channels)
+
   source                = "./terraform-modules/function-slack"
-  functions             = var.functions
   name                  = var.name
   project               = var.project
   region                = var.region
@@ -79,10 +81,21 @@ module "function-slack" {
   ingress_settings      = var.ingress_settings
   runtime               = var.runtime
   pubsub_topic          = module.pubsub-results.pubsub_topic_name
+  secret_resource_id    = module.secret-manager[each.key].secret_resource_id
+  secret_version_name   = module.secret-manager[each.key].secret_version_name
   service_account_email = module.iam.service_account_email
-  slack_channels        = local.env == "dev" ? var.slack_channels_dev : var.slack_channels
-  slack_webhook_urls    = var.slack_webhook_urls
+  slack_channel         = each.key
   slack_emoji           = var.slack_emoji
   slack_username        = var.slack_username
   depends_on            = [module.services.cloud_functions_service_id, module.services.cloud_build_service_id]
+}
+
+module "secret-manager" {
+  for_each = local.secrets
+
+  source       = "./terraform-modules/secret-manager"
+  app_name     = var.name
+  secret_name  = each.key
+  secret_value = each.value
+  depends_on   = [module.services.secret_manager_service_id]
 }

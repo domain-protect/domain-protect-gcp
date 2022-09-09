@@ -17,6 +17,7 @@ resource "google_service_account" "function_runtime" {
 # Organization level permissions are set using the console - see README for details
 resource "google_project_iam_member" "permissions" {
   member   = "serviceAccount:${google_service_account.function_runtime.email}"
-  for_each = toset(["roles/pubsub.publisher", "roles/pubsub.subscriber"])
+  project  = var.project
+  for_each = toset(["roles/pubsub.publisher", "roles/pubsub.subscriber", "roles/secretmanager.secretAccessor"])
   role     = each.key
 }
