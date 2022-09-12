@@ -70,9 +70,8 @@ module "function" {
 }
 
 module "function-slack" {
-  for_each = toset(local.slack_channels)
-
   source                = "./terraform-modules/function-slack"
+  for_each              = toset(local.slack_channels)
   name                  = var.name
   project               = var.project
   region                = var.region
@@ -91,9 +90,9 @@ module "function-slack" {
 }
 
 module "secret-manager" {
-  for_each = local.secrets
-
   source       = "./terraform-modules/secret-manager"
+  for_each     = local.secrets
+  region       = var.region
   app_name     = var.name
   secret_name  = each.key
   secret_value = each.value
