@@ -1,8 +1,19 @@
+# Dummy resource to ensure archive is created at apply stage
+resource "null_resource" "dummy_trigger" {
+  triggers = {
+    timestamp = timestamp()
+  }
+}
+
 # zip source code
 data "archive_file" "code" {
   type        = "zip"
   source_dir  = "${path.module}/code/projects"
   output_path = "${path.module}/build/projects.zip"
+  depends_on = [
+    # Make sure archive is created in apply stage
+    null_resource.dummy_trigger
+  ]
 }
 
 # upload compressed code to bucket

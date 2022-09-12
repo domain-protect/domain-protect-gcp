@@ -95,16 +95,17 @@ Organization Viewer (roles/resourcemanager.organizationViewer)
 * use OpenID Connect, service account keys not required
 * configuration details provided at [domain-protect-gcp-deploy](https://github.com/domain-protect/domain-protect-gcp-deploy)
 
-| GITHUB ACTIONS SECRETS             | EXAMPLE                                                                         |
-|--------------------------------|------------------------------------------------------------------------------------------------|
+| GITHUB ACTIONS SECRETS         | EXAMPLE                                                                                                      |
+|--------------------------------|--------------------------------------------------------------------------------------------------------------|
+| PROJECT                        | mygcpprojectid                                                                                               |
+| APP_SERVICE_REGION             | europe-west2                                                                                                 |
 | GCP_WORKLOAD_IDENTITY_PROVIDER | projects/123456789/locations/global/workloadIdentityPools/github-actions/providers/domain-protect-gcp-github |
-| GCP_SERVICE_ACCOUNT            | my-service-account@my-project.iam.gserviceaccount.com                                          |
-| TERRAFORM_STATE_BUCKET         | tfstate48903                                                                                   |
-| TERRAFORM_STATE_PREFIX         | terraform/state/domain-protect-gcp                                                                             |                                                               |                                  |
-| SLACK_CHANNELS                 | ["security-alerts"]                                                                            |
-| SLACK_CHANNELS_DEV             | ["security-alerts-dev"]                                                                        |
-| SLACK_WEBHOOK_URLS             | ["https://hooks.slack.com/services/XXX/XXX/XXX"]                                               |
-| TF_VAR_project                 | mygcpprojectid                                                                                 |
+| GCP_SERVICE_ACCOUNT            | my-service-account@my-project.iam.gserviceaccount.com                                                        |
+| TERRAFORM_STATE_BUCKET         | tfstate48903                                                                                                 |
+| TERRAFORM_STATE_PREFIX         | terraform/state/domain-protect-gcp                                                                           |                                                               |                                  |
+| SLACK_CHANNELS                 | ["security-alerts"]                                                                                          |
+| SLACK_CHANNELS_DEV             | ["security-alerts-dev"]                                                                                      |
+| SLACK_WEBHOOK_URLS             | ["https://hooks.slack.com/services/XXX/XXX/XXX"]                                                             |
 
 
 ## local development
