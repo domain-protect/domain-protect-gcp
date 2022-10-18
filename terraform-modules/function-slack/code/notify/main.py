@@ -63,6 +63,7 @@ def notify(event, context):
             slack_url,
             data=json.dumps(payload),
             headers={"Content-Type": "application/json"},
+            timeout=10,
         )
         if response.status_code != 200:
             ValueError(f"Request to Slack returned error {response.status_code}:\n{response.text}")
