@@ -16,7 +16,9 @@ def notify(event, context):
     slack_emoji = os.environ["SLACK_EMOJI"]
     slack_url = os.environ["SLACK_URL"]
 
-    print(f"Function triggered by messageId {context.event_id} at {context.timestamp} to {context.resource['name']}")
+    print(
+        f"Function triggered by messageId {context.event_id} at {context.timestamp} to {context.resource['name']}"
+    )
 
     if "data" in event:
         pubsub_message = base64.b64decode(event["data"]).decode("utf-8")
@@ -42,19 +44,29 @@ def notify(event, context):
 
             try:
                 cname = finding["CNAME"]
-                print(f"VULNERABLE: {finding['Domain']}  CNAME  {cname} in GCP Project {finding['Project']}")
+                print(
+                    f"VULNERABLE: {finding['Domain']}  CNAME  {cname} in GCP Project {finding['Project']}"
+                )
                 slack_message["fields"].append(
                     {
-                        "value": finding["Domain"] + "  CNAME  " + cname + " in GCP Project " + finding["Project"],
+                        "value": finding["Domain"]
+                        + "  CNAME  "
+                        + cname
+                        + " in GCP Project "
+                        + finding["Project"],
                         "short": False,
                     }
                 )
 
             except KeyError:
-                print(f"VULNERABLE: {finding['Domain']} in GCP Project {finding['Project']}")
+                print(
+                    f"VULNERABLE: {finding['Domain']} in GCP Project {finding['Project']}"
+                )
                 slack_message["fields"].append(
                     {
-                        "value": finding["Domain"] + " in GCP Project " + finding["Project"],
+                        "value": finding["Domain"]
+                        + " in GCP Project "
+                        + finding["Project"],
                         "short": False,
                     }
                 )
@@ -64,9 +76,11 @@ def notify(event, context):
             slack_url,
             data=json.dumps(payload),
             headers={"Content-Type": "application/json"},
-            timeout=requests_timeout()
+            timeout=requests_timeout(),
         )
         if response.status_code != 200:
-            ValueError(f"Request to Slack returned error {response.status_code}:\n{response.text}")
+            ValueError(
+                f"Request to Slack returned error {response.status_code}:\n{response.text}"
+            )
         else:
             print(f"Message sent to {slack_channel} Slack channel")
