@@ -6,7 +6,6 @@ import base64
 import json
 import os
 import requests
-from utils_globalvars import requests_timeout
 
 
 def notify(event, context):
