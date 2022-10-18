@@ -6,6 +6,7 @@ import base64
 import json
 import os
 import requests
+from utils_globalvars import requests_timeout
 
 
 def notify(event, context):
@@ -63,6 +64,7 @@ def notify(event, context):
             slack_url,
             data=json.dumps(payload),
             headers={"Content-Type": "application/json"},
+            timeout=requests_timeout()
         )
         if response.status_code != 200:
             ValueError(f"Request to Slack returned error {response.status_code}:\n{response.text}")
