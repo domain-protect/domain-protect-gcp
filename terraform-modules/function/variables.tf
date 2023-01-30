@@ -9,3 +9,4 @@ variable "runtime" {}
 variable "timeout" {}
 variable "pubsub_topic" {}
 variable "service_account_email" {}
+variable "service_account_eventarc" {}

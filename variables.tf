@@ -30,7 +30,7 @@ variable "zone" {
 
 variable "functions" {
   description = "list of names of Functions files in the function/code folder"
-  default     = ["cname", "ns", "cname_storage", "a_storage"]
+  default     = ["cname", "ns", "cnamestorage", "astorage"] # names cannot include hyphens or underscores
   type        = list(any)
 }
 

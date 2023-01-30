@@ -9,6 +9,13 @@ module "iam" {
   depends_on = [module.services.iam_service_id]
 }
 
+module "iam-eventarc" {
+  source     = "./terraform-modules/iam-eventarc"
+  name       = var.name
+  project    = var.project
+  depends_on = [module.services.event_arc_service_id]
+}
+
 module "pubsub-projects" {
   source  = "./terraform-modules/pubsub-projects"
   name    = var.name
@@ -40,53 +47,56 @@ module "storage" {
 }
 
 module "function-projects" {
-  source                = "./terraform-modules/function-projects"
-  name                  = var.name
-  project               = var.project
-  region                = var.region
-  bucket_name           = module.storage.bucket_name
-  timeout               = var.timeout
-  ingress_settings      = var.ingress_settings
-  runtime               = var.runtime
-  pubsub_topic          = module.pubsub-scheduler.pubsub_topic_name
-  service_account_email = module.iam.service_account_email
-  depends_on            = [module.services.cloud_functions_service_id, module.services.cloud_build_service_id]
+  source                   = "./terraform-modules/function-projects"
+  name                     = var.name
+  project                  = var.project
+  region                   = var.region
+  bucket_name              = module.storage.bucket_name
+  timeout                  = var.timeout
+  ingress_settings         = var.ingress_settings
+  runtime                  = var.runtime
+  pubsub_topic             = module.pubsub-scheduler.pubsub_topic_name
+  service_account_email    = module.iam.service_account_email
+  service_account_eventarc = module.iam-eventarc.service_account_email
+  depends_on               = [module.services.cloud_functions_service_id, module.services.cloud_build_service_id, module.services.cloud_run_service_id]
 }
 
 module "function" {
-  source                = "./terraform-modules/function"
-  functions             = var.functions
-  name                  = var.name
-  project               = var.project
-  region                = var.region
-  bucket_name           = module.storage.bucket_name
-  available_memory      = var.available_memory
-  timeout               = var.timeout
-  ingress_settings      = var.ingress_settings
-  runtime               = var.runtime
-  pubsub_topic          = module.pubsub-projects.pubsub_topic_name
-  service_account_email = module.iam.service_account_email
-  depends_on            = [module.services.cloud_functions_service_id, module.services.cloud_build_service_id]
+  source                   = "./terraform-modules/function"
+  functions                = var.functions
+  name                     = var.name
+  project                  = var.project
+  region                   = var.region
+  bucket_name              = module.storage.bucket_name
+  available_memory         = var.available_memory
+  timeout                  = var.timeout
+  ingress_settings         = var.ingress_settings
+  runtime                  = var.runtime
+  pubsub_topic             = module.pubsub-projects.pubsub_topic_name
+  service_account_email    = module.iam.service_account_email
+  service_account_eventarc = module.iam-eventarc.service_account_email
+  depends_on               = [module.services.cloud_functions_service_id, module.services.cloud_build_service_id, module.services.cloud_run_service_id, module.services.event_arc_service_id]
 }
 
 module "function-slack" {
-  source                = "./terraform-modules/function-slack"
-  for_each              = toset(local.slack_channels)
-  name                  = var.name
-  project               = var.project
-  region                = var.region
-  bucket_name           = module.storage.bucket_name
-  timeout               = var.timeout
-  ingress_settings      = var.ingress_settings
-  runtime               = var.runtime
-  pubsub_topic          = module.pubsub-results.pubsub_topic_name
-  secret_resource_id    = module.secret-manager[each.key].secret_resource_id
-  secret_version_name   = module.secret-manager[each.key].secret_version_name
-  service_account_email = module.iam.service_account_email
-  slack_channel         = each.key
-  slack_emoji           = var.slack_emoji
-  slack_username        = var.slack_username
-  depends_on            = [module.services.cloud_functions_service_id, module.services.cloud_build_service_id]
+  source                   = "./terraform-modules/function-slack"
+  for_each                 = toset(local.slack_channels)
+  name                     = var.name
+  project                  = var.project
+  region                   = var.region
+  bucket_name              = module.storage.bucket_name
+  timeout                  = var.timeout
+  ingress_settings         = var.ingress_settings
+  runtime                  = var.runtime
+  pubsub_topic             = module.pubsub-results.pubsub_topic_name
+  secret_resource_id       = module.secret-manager[each.key].secret_resource_id
+  secret_version_name      = module.secret-manager[each.key].secret_version_name
+  service_account_email    = module.iam.service_account_email
+  service_account_eventarc = module.iam-eventarc.service_account_email
+  slack_channel            = each.key
+  slack_emoji              = var.slack_emoji
+  slack_username           = var.slack_username
+  depends_on               = [module.services.cloud_functions_service_id, module.services.cloud_build_service_id, module.services.cloud_run_service_id]
 }
 
 module "secret-manager" {
