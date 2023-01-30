@@ -7,4 +7,5 @@ locals {
   secret_resource_id_list = split("/", var.secret_resource_id)
   secret_id               = element(local.secret_resource_id_list, length(local.secret_resource_id_list) - 1)
 
+  slack_channel_sanitised = replace(var.slack_channel, "_", "-") # satisfy Cloud Run naming requirements
 }
