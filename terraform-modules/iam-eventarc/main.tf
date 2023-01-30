@@ -16,6 +16,6 @@ resource "google_service_account" "eventarc" {
 resource "google_project_iam_member" "permissions" {
   member   = "serviceAccount:${google_service_account.eventarc.email}"
   project  = var.project
-  for_each = toset(["roles/run.invoker", "roles/eventarc.eventReceiver"])
+  for_each = toset(["roles/cloudfunctions.serviceAgent", "roles/run.invoker", "roles/eventarc.eventReceiver"])
   role     = each.key
 }

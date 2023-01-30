@@ -3,5 +3,5 @@ output "Domain_Protect_permissions" {
 }
 
 output "Pub_Sub_permissions" {
-  value = "Use GCP IAM console to grant project level permission to Google managed service account service-${data.google_project.project.number}@gcp-sa-pubsub.iam.gserviceaccount.com see https://github.com/domain-protect/domain-protect-gcp#ensure-correct-Pub/Sub-project-level-permissions"
+  value = "Use GCP IAM console to grant project level permission to Google managed service account service-${data.google_project.project.number}@gcp-sa-pubsub.iam.gserviceaccount.com see https://github.com/domain-protect/domain-protect-gcp#ensure-correct-pubsub-project-level-permissions"
 }
