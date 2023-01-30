@@ -84,9 +84,16 @@ Organization Viewer (roles/resourcemanager.organizationViewer)
 ```
 * This step is performed manually to avoid giving org wide IAM permisssions to the Terraform service account
 
-## ensure correct Pub/Sub project level permissions
-* Functions v2 requires an additional Pub/Sub permission at the project level
-* You need to add this if you enabled the Pub/Sub service account on or before April 8, 2021
+## ensure correct permissions on Google service accounts
+* Functions v2 requires an additional permission on two Google managed service accounts
+* These are GCP Project level settings
+* Role required: `roles/iam.serviceAccountTokenCreator`
+* Google managed service accounts:
+```
+service-${PROJECT_NUMBER}@gcp-sa-pubsub.iam.gserviceaccount.com
+service-${PROJECT_NUMBER}@gcf-admin-robot.iam.gserviceaccount.com
+```
+* They may need to be added using the console or `gcloud`
 * In GCP console for the security project select IAM
 
 ![Alt text](images/google-services.png?raw=true "Show Google services")
@@ -96,12 +103,22 @@ Organization Viewer (roles/resourcemanager.organizationViewer)
 
 ![Alt text](images/pubsub-permissions.png?raw=true "Pub/Sub permissions")
 
-* ensure project Pub/Sub service accounts has been assigned the Service Account Token Creator role
+* if it's not present, that means you need to grant access
+* select the Google functions robot service account
+
+![Alt text](images/robot-permissions.png?raw=true "GCF robot permissions")
+
+* if required, add the Service Account Token Creator role to both service accounts
+* this can be done via the GCP console or using gcloud:
 ```
 export PROJECT_NUMBER="$(gcloud projects describe $(gcloud config get-value project) --format='value(projectNumber)')"
 
 gcloud projects add-iam-policy-binding $(gcloud config get-value project) \
     --member="serviceAccount:service-${PROJECT_NUMBER}@gcp-sa-pubsub.iam.gserviceaccount.com" \
+    --role='roles/iam.serviceAccountTokenCreator'
+
+gcloud projects add-iam-policy-binding $(gcloud config get-value project) \
+    --member="serviceAccount:service-${PROJECT_NUMBER}@gcf-admin-robot.iam.gserviceaccount.com" \
     --role='roles/iam.serviceAccountTokenCreator'
 ```
 
