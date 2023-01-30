@@ -84,6 +84,27 @@ Organization Viewer (roles/resourcemanager.organizationViewer)
 ```
 * This step is performed manually to avoid giving org wide IAM permisssions to the Terraform service account
 
+## ensure correct Pub/Sub project level permissions
+* Functions v2 requires an additional Pub/Sub permission at the project level
+* You need to add this if you enabled the Pub/Sub service account on or before April 8, 2021
+* In GCP console for the security project select IAM
+
+![Alt text](images/google-services.png?raw=true "Show Google services")
+
+* tick the box `Include Google provided role grants`
+* select the Google Pub/Sub service account
+
+![Alt text](images/pubsub-permissions.png?raw=true "Pub/Sub permissions")
+
+* ensure project Pub/Sub service accounts has been assigned the Service Account Token Creator role
+```
+export PROJECT_NUMBER="$(gcloud projects describe $(gcloud config get-value project) --format='value(projectNumber)')"
+
+gcloud projects add-iam-policy-binding $(gcloud config get-value project) \
+    --member="serviceAccount:service-${PROJECT_NUMBER}@gcp-sa-pubsub.iam.gserviceaccount.com" \
+    --role='roles/iam.serviceAccountTokenCreator'
+```
+
 ## adding notifications to extra Slack channels
 * add an extra channel to your slack_channels variable list
 * add an extra webhook URL or repeat the same webhook URL to your slack_webhook_urls variable list

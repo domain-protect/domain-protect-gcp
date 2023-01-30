@@ -9,6 +9,7 @@ variable "runtime" {}
 variable "timeout" {}
 variable "pubsub_topic" {}
 variable "service_account_email" {}
+variable "service_account_eventarc" {}
 variable "slack_channel" {}
 variable "slack_emoji" {}
 variable "slack_username" {}

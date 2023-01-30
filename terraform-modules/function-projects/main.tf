@@ -23,25 +23,39 @@ resource "google_storage_bucket_object" "function" {
   source = "${path.module}/build/projects.zip"
 }
 
-resource "google_cloudfunctions_function" "function" {
-  name                  = "${var.name}-projects-${local.env}"
-  description           = "${var.name} Lists all projects in Organization and writes to ${local.env} Pub/Sub topic"
-  source_archive_bucket = var.bucket_name
-  source_archive_object = google_storage_bucket_object.function.name
-  timeout               = var.timeout
-  entry_point           = "projects"
-  runtime               = var.runtime
-  service_account_email = var.service_account_email
-  ingress_settings      = var.ingress_settings
+resource "google_cloudfunctions2_function" "function" {
+  name        = "${var.name}-projects-${local.env}"
+  description = "${var.name} Lists all projects in Organization and writes to ${local.env} Pub/Sub topic"
+  location    = var.region
 
-  environment_variables = {
-    SECURITY_PROJECT = var.project
-    APP_ENVIRONMENT  = local.env
-    APP_NAME         = var.name
+  build_config {
+    runtime     = var.runtime
+    entry_point = "projects"
+
+    source {
+      storage_source {
+        bucket = var.bucket_name
+        object = google_storage_bucket_object.function.name
+      }
+    }
+  }
+
+  service_config {
+    timeout_seconds = var.timeout
+    environment_variables = {
+      SECURITY_PROJECT = var.project
+      APP_ENVIRONMENT  = local.env
+      APP_NAME         = var.name
+    }
+    all_traffic_on_latest_revision = true
+    service_account_email          = var.service_account_email
+    ingress_settings               = var.ingress_settings
   }
 
   event_trigger {
-    event_type = "google.pubsub.topic.publish"
-    resource   = "projects/${var.project}/topics/${var.pubsub_topic}"
+    trigger_region        = var.region
+    event_type            = "google.cloud.pubsub.topic.v1.messagePublished"
+    pubsub_topic          = "projects/${var.project}/topics/${var.pubsub_topic}"
+    service_account_email = var.service_account_eventarc
   }
 }

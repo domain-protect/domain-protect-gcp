@@ -10,7 +10,15 @@ from google.cloud import pubsub_v1
 def vulnerable_storage(domain_name):
 
     try:
-        response = requests.get(f"http://{domain_name}", timeout=1)
+        response = requests.get("https://" + domain_name, timeout=0.5)
+        if "NoSuchBucket" in response.text:
+            return True
+
+    except (requests.exceptions.SSLError, requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout):
+        pass
+
+    try:
+        response = requests.get("http://" + domain_name, timeout=0.2)
         if "NoSuchBucket" in response.text:
             return True
 
@@ -28,7 +36,7 @@ def gcp(project):
         managed_zones = dns_client.list_zones()
 
         for managed_zone in managed_zones:
-            print(f"Searching for CNAMEs with missing storage buckets in {managed_zone.dns_name}")
+            print(f"Searching for vulnerable A records in {managed_zone.dns_name}")
 
             dns_record_client = google.cloud.dns.zone.ManagedZone(name=managed_zone.name, client=dns_client)
 
@@ -37,35 +45,32 @@ def gcp(project):
                 resource_record_sets = [
                     r
                     for r in records
-                    if "CNAME" in r.record_type
-                    and any(vulnerability in r.rrdatas[0] for vulnerability in vulnerability_list)
+                    if r.record_type in "A" and not any(ip_address.startswith("10.") for ip_address in r.rrdatas)
                 ]
+
                 for resource_record_set in resource_record_sets:
-                    cname_record = resource_record_set.name
-                    cname_value = resource_record_set.rrdatas[0]
+                    a_record = resource_record_set.name
                     print(f"Testing {resource_record_set.name} for vulnerability")
-                    result = vulnerable_storage(cname_record)
+                    result = vulnerable_storage(a_record)
                     if result:
-                        print(f"VULNERABLE: {cname_record}  CNAME {cname_value} in GCP project {project}")
-                        vulnerable_domains.append(cname_record)
-                        json_data["Findings"].append({"Project": project, "Domain": cname_record, "CNAME": cname_value})
+                        print(f"VULNERABLE: {a_record} in GCP project {project}")
+                        vulnerable_domains.append(a_record)
+                        json_data["Findings"].append({"Project": project, "Domain": a_record})
 
     except google.api_core.exceptions.Forbidden:
         pass
 
 
-def cname_storage(event, context):  # pylint:disable=unused-argument
+def astorage(event, context):  # pylint:disable=unused-argument
 
     security_project = os.environ["SECURITY_PROJECT"]
     app_name = os.environ["APP_NAME"]
     app_environment = os.environ["APP_ENVIRONMENT"]
 
-    global vulnerability_list
-    vulnerability_list = ["amazonaws.com", "cloudfront.net", "c.storage.googleapis.com"]
     global vulnerable_domains
     vulnerable_domains = []
     global json_data
-    json_data = {"Findings": [], "Subject": "Vulnerable CNAME records in Google Cloud DNS"}
+    json_data = {"Findings": [], "Subject": "Vulnerable A record in Google Cloud DNS - missing storage bucket"}
 
     if "data" in event:
         pubsub_message = base64.b64decode(event["data"]).decode("utf-8")

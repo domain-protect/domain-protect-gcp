@@ -23,31 +23,46 @@ resource "google_storage_bucket_object" "function" {
   source = "${path.module}/build/notify.zip"
 }
 
-resource "google_cloudfunctions_function" "function" {
-  name                  = "${var.name}-notify-${var.slack_channel}-${local.env}"
-  description           = "${var.name} Slack notification function to ${var.slack_channel} channel in ${local.env} environment"
-  source_archive_bucket = var.bucket_name
-  source_archive_object = google_storage_bucket_object.function.name
-  timeout               = var.timeout
-  entry_point           = "notify"
-  runtime               = var.runtime
-  service_account_email = var.service_account_email
-  ingress_settings      = var.ingress_settings
+resource "google_cloudfunctions2_function" "function" {
+  name        = "${var.name}-notify-${var.slack_channel}-${local.env}"
+  description = "${var.name} Slack notification function to ${var.slack_channel} channel in ${local.env} environment"
+  location    = var.region
 
-  environment_variables = {
-    SLACK_CHANNEL  = var.slack_channel
-    SLACK_USERNAME = var.slack_username
-    SLACK_EMOJI    = var.slack_emoji
+  build_config {
+    runtime     = var.runtime
+    entry_point = "notify"
+
+    source {
+      storage_source {
+        bucket = var.bucket_name
+        object = google_storage_bucket_object.function.name
+      }
+    }
   }
 
-  secret_environment_variables {
-    key     = "SLACK_URL"
-    secret  = local.secret_id
-    version = local.secret_version
+  service_config {
+    timeout_seconds = var.timeout
+    environment_variables = {
+      SLACK_CHANNEL  = var.slack_channel
+      SLACK_USERNAME = var.slack_username
+      SLACK_EMOJI    = var.slack_emoji
+    }
+    all_traffic_on_latest_revision = true
+    service_account_email          = var.service_account_email
+    ingress_settings               = var.ingress_settings
+
+    secret_environment_variables {
+      key        = "SLACK_URL"
+      project_id = var.project
+      secret     = local.secret_id
+      version    = local.secret_version
+    }
   }
 
   event_trigger {
-    event_type = "google.pubsub.topic.publish"
-    resource   = "projects/${var.project}/topics/${var.pubsub_topic}"
+    trigger_region        = var.region
+    event_type            = "google.cloud.pubsub.topic.v1.messagePublished"
+    pubsub_topic          = "projects/${var.project}/topics/${var.pubsub_topic}"
+    service_account_email = var.service_account_eventarc
   }
 }

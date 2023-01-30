@@ -21,3 +21,11 @@ output "cloud_build_service_id" {
 output "secret_manager_service_id" {
   value = google_project_service.secret_manager.id
 }
+
+output "cloud_run_service_id" {
+  value = google_project_service.cloud_run.id
+}
+
+output "event_arc_service_id" {
+  value = google_project_service.event_arc.id
+}
