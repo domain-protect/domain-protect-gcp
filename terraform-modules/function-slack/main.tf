@@ -24,7 +24,7 @@ resource "google_storage_bucket_object" "function" {
 }
 
 resource "google_cloudfunctions2_function" "function" {
-  name        = "${var.name}-notify-${var.slack_channel}-${local.env}"
+  name        = "${var.name}-notify-${local.slack_channel_sanitised}-${local.env}"
   description = "${var.name} Slack notification function to ${var.slack_channel} channel in ${local.env} environment"
   location    = var.region
 
