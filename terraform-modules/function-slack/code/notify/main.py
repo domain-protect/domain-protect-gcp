@@ -14,7 +14,6 @@ def notify(event, context):
     slack_username = os.environ["SLACK_USERNAME"]
     slack_emoji = os.environ["SLACK_EMOJI"]
     slack_url = os.environ["SLACK_URL"]
-    slack_webhook_type = os.environ["SLACK_WEBHOOK_TYPE"]
 
     print(f"Function triggered by messageId {context.event_id} at {context.timestamp} to {context.resource['name']}")
 
@@ -26,7 +25,7 @@ def notify(event, context):
         findings = json_data["Findings"]
 
         title = "Vulnerable domains"
-        if slack_webhook_type == "app":
+        if os.environ["SLACK_WEBHOOK_TYPE"] == "app":
             title = f"{slack_emoji} {title}"
 
         payload = {
