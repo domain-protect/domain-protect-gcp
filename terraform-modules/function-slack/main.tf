@@ -43,9 +43,10 @@ resource "google_cloudfunctions2_function" "function" {
   service_config {
     timeout_seconds = var.timeout
     environment_variables = {
-      SLACK_CHANNEL  = var.slack_channel
-      SLACK_USERNAME = var.slack_username
-      SLACK_EMOJI    = var.slack_emoji
+      SLACK_CHANNEL      = var.slack_channel
+      SLACK_USERNAME     = var.slack_username
+      SLACK_EMOJI        = var.slack_emoji
+      SLACK_WEBHOOK_TYPE = var.slack_webhook_type
     }
     all_traffic_on_latest_revision = true
     service_account_email          = var.service_account_email

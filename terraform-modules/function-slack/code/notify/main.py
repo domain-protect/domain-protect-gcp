@@ -14,6 +14,7 @@ def notify(event, context):
     slack_username = os.environ["SLACK_USERNAME"]
     slack_emoji = os.environ["SLACK_EMOJI"]
     slack_url = os.environ["SLACK_URL"]
+    slack_webhook_type = os.environ["SLACK_WEBHOOK_TYPE"]
 
     print(f"Function triggered by messageId {context.event_id} at {context.timestamp} to {context.resource['name']}")
 
@@ -23,6 +24,10 @@ def notify(event, context):
         # print(pubsub_message)
         json_data = json.loads(pubsub_message)
         findings = json_data["Findings"]
+
+        title = "Vulnerable domains"
+        if slack_webhook_type == "app":
+            title = f"{slack_emoji} {title}"
 
         payload = {
             "channel": slack_channel,
@@ -34,7 +39,7 @@ def notify(event, context):
 
         slack_message = {
             "fallback": "A new message",
-            "fields": [{"title": "Vulnerable domains"}],
+            "fields": [{"title": title}],
         }
 
         for finding in findings:

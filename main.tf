@@ -96,6 +96,7 @@ module "function-slack" {
   slack_channel            = each.key
   slack_emoji              = var.slack_emoji
   slack_username           = var.slack_username
+  slack_webhook_type       = var.slack_webhook_type
   depends_on               = [module.services.cloud_functions_service_id, module.services.cloud_build_service_id, module.services.cloud_run_service_id]
 }
 

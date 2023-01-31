@@ -40,8 +40,9 @@ Scans Google Cloud DNS for:
 * Slack channel notification per vulnerability type, listing account names and vulnerable domains
 
 ## requirements
+* Slack App or legacy Slack webhook, see [Slack Webhook](./docs/slack-webhook.md) for details
 * Storage bucket for Terraform state file
-* Terraform 1.0.x
+* Terraform 1.x
 * Service Usage API enabled on Google Cloud project
 
 ## deployment permissions
