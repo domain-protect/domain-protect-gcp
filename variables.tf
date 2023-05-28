@@ -89,7 +89,7 @@ variable "available_memory" {
 
 variable "runtime" {
   description = "Lambda language runtime"
-  default     = "python39"
+  default     = "python311"
 }
 
 variable "timeout" {

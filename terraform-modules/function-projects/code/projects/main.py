@@ -52,29 +52,25 @@ def projects(event, context):  # pylint:disable=unused-argument
     folder_ids = list_folders(org_id)
 
     # Make sure that there are actually folders under the org
-    if len(folder_ids) == 0:
-        return all_projects
+    if len(folder_ids) > 0:
 
-    # Start iterating over the folders
-    while folder_ids:
-        # Get the last folder of the list
-        current_id = folder_ids.pop()
+        # Start iterating over the folders
+        while folder_ids:
+            # Get the last folder of the list
+            current_id = folder_ids.pop()
 
-        # Get subfolders and add them to the list of folders
-        subfolders = list_folders(current_id)
+            # Get subfolders and add them to the list of folders
+            subfolders = list_folders(current_id)
 
-        if subfolders:
-            folder_ids.extend(f for f in subfolders)
+            if subfolders:
+                folder_ids.extend(f for f in subfolders)
 
-        # Get the projects under that folder
-        projects_under_folder = list_projects(current_id)
+            # Get the projects under that folder
+            projects_under_folder = list_projects(current_id)
 
-        # Add projects if there are any
-        if projects_under_folder:
-            all_projects.extend(p for p in projects_under_folder)
-
-    # Finally, return all the projects
-    # return all_projects
+            # Add projects if there are any
+            if projects_under_folder:
+                all_projects.extend(p for p in projects_under_folder)
 
     print(f"Found {len(all_projects)} Projects in Organization")
 
