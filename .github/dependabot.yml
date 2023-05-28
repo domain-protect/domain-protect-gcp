@@ -5,3 +5,10 @@ updates:
     schedule:
     # Check for updates to GitHub Actions every week
       interval: "weekly"
+
+    # Check for Python dependency updates
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    target-branch: "dependencies"
