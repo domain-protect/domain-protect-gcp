@@ -69,7 +69,7 @@ jobs:
       checks: write
     steps:
       - name: Terraform setup
-        uses: hashicorp/setup-terraform@v2
+        uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: 1.4.6
 
