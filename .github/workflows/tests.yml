@@ -48,7 +48,7 @@ jobs:
           1> ${{runner.temp}}/reports_sast_python/${RANDOM}.json
 
       - name: save json report
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: sast_python
           if-no-files-found: error
@@ -98,7 +98,7 @@ jobs:
           1> ${{runner.temp}}/reports_sast_terraform/${RANDOM}.json
 
       - name: save json report
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: sast_terraform
           if-no-files-found: error
