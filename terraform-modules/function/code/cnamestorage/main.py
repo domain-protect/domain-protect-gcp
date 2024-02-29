@@ -5,9 +5,15 @@ import os
 import google.cloud.dns
 import requests
 from google.cloud import pubsub_v1
+from random import choice
+from string import ascii_letters, digits
 
 
 def vulnerable_storage(domain_name):
+    # Handle wildcard A records by passing in a random 5 character string
+    if domain_name[0] == '*':
+        random_string = ''.join(choice(ascii_letters + digits) for _ in range(5))
+        domain_name = random_string + domain_name[1:]
 
     try:
         response = requests.get(f"http://{domain_name}", timeout=1)
@@ -38,7 +44,7 @@ def gcp(project):
                     r
                     for r in records
                     if "CNAME" in r.record_type
-                    and any(vulnerability in r.rrdatas[0] for vulnerability in vulnerability_list)
+                    and any(vulnerability in r.rrdatas for vulnerability in vulnerability_list)
                 ]
                 for resource_record_set in resource_record_sets:
                     cname_record = resource_record_set.name

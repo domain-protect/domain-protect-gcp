@@ -2,6 +2,8 @@ from datetime import datetime
 
 import google.cloud.dns
 import requests
+from random import choice
+from string import ascii_letters, digits
 from utils_gcp import list_all_projects
 from utils_print import my_print, print_list
 
@@ -12,6 +14,10 @@ cname_values = []
 
 
 def vulnerable_storage(domain_name):
+    # Handle wildcard A records by passing in a random 5 character string
+    if domain_name[0] == '*':
+        random_string = ''.join(choice(ascii_letters + digits) for _ in range(5))
+        domain_name = random_string + domain_name[1:]
 
     try:
         response = requests.get("https://" + domain_name, timeout=1)
