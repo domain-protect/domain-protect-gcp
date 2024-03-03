@@ -5,15 +5,9 @@ import os
 import google.cloud.dns
 import requests
 from google.cloud import pubsub_v1
-from random import choice
-from string import ascii_letters, digits
 
 
 def vulnerable_storage(domain_name):
-    # Handle wildcard A records by passing in a random 5 character string
-    if domain_name[0] == '*':
-        random_string = ''.join(choice(ascii_letters + digits) for _ in range(5))
-        domain_name = random_string + domain_name[1:]
 
     try:
         response = requests.get("https://" + domain_name, timeout=0.5)
