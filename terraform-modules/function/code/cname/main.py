@@ -45,7 +45,7 @@ def gcp(project):
                     r
                     for r in records
                     if "CNAME" in r.record_type
-                    and any(vulnerability in r.rrdatas for vulnerability in vulnerability_list)
+                    and any(vulnerability in r.rrdatas[0] for vulnerability in vulnerability_list)
                 ]
 
                 for resource_record_set in resource_record_sets:
