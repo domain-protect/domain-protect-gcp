@@ -5,16 +5,26 @@ import os
 import google.cloud.dns
 import requests
 from google.cloud import pubsub_v1
+from secrets import choice
+from string import ascii_letters, digits
 
 
 def vulnerable_storage(domain_name):
+    # Handle wildcard A records by passing in a random 5 character string
+    if domain_name[0] == "*":
+        random_string = "".join(choice(ascii_letters + digits) for _ in range(5))
+        domain_name = random_string + domain_name[1:]
 
     try:
         response = requests.get("https://" + domain_name, timeout=0.5)
         if "NoSuchBucket" in response.text:
             return True
 
-    except (requests.exceptions.SSLError, requests.exceptions.ConnectionError, requests.exceptions.ReadTimeout):
+    except (
+        requests.exceptions.SSLError,
+        requests.exceptions.ConnectionError,
+        requests.exceptions.ReadTimeout,
+    ):
         pass
 
     try:
@@ -70,7 +80,10 @@ def astorage(event, context):  # pylint:disable=unused-argument
     global vulnerable_domains
     vulnerable_domains = []
     global json_data
-    json_data = {"Findings": [], "Subject": "Vulnerable A record in Google Cloud DNS - missing storage bucket"}
+    json_data = {
+        "Findings": [],
+        "Subject": "Vulnerable A record in Google Cloud DNS - missing storage bucket",
+    }
 
     if "data" in event:
         pubsub_message = base64.b64decode(event["data"]).decode("utf-8")
