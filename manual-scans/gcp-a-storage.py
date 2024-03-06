@@ -1,5 +1,5 @@
 from datetime import datetime
-
+import asyncio
 import google.cloud.dns
 import requests
 from utils_gcp import list_all_projects
@@ -75,21 +75,19 @@ def gcp(project):
                     else:
                         suspected_domains.append(a_record)
                         my_print(f"{str(i)}. {a_record}", "SECURE")
+        return 1
 
     except google.api_core.exceptions.Forbidden:
-        pass
+        return 0
 
 
-if __name__ == "__main__":
+async def main():
+    to_scan = []
+    for project in await list_all_projects():
+        to_scan.append(asyncio.to_thread(gcp, project))
 
-    projects = list_all_projects()
-    total_projects = len(projects)
-    scanned_projects = 0
-
-    for project in projects:
-        gcp(project)
-        scanned_projects = scanned_projects + 1
-
+    total_projects = len(to_scan)
+    scanned_projects = sum(await asyncio.gather(*to_scan))
     scan_time = datetime.now() - start_time
     print(f"Scanned {str(scanned_projects)} of {str(total_projects)} projects in {scan_time.seconds} seconds")
 
@@ -99,3 +97,7 @@ if __name__ == "__main__":
     if count > 0:
         my_print("List of Vulnerable Domains:", "INFOB")
         print_list(vulnerable_domains)
+
+
+if __name__ == "__main__":
+    asyncio.run(main())

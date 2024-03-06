@@ -1,5 +1,5 @@
 from datetime import datetime
-
+import asyncio
 import dns.resolver
 import google.cloud.dns
 from utils_gcp import list_all_projects
@@ -65,25 +65,28 @@ def gcp(project):
                         my_print(f"{str(i)}. {ns_record}", "ERROR")
                     else:
                         my_print(f"{str(i)}. {ns_record}", "SECURE")
-
+        return 1
     except google.api_core.exceptions.Forbidden:
-        pass
+        return 0
 
 
-projects = list_all_projects()
-total_projects = len(projects)
-scanned_projects = 0
+async def main():
+    to_scan = []
+    for project in await list_all_projects():
+        to_scan.append(asyncio.to_thread(gcp, project))
 
-for project in projects:
-    gcp(project)
-    scanned_projects = scanned_projects + 1
+    total_projects = len(to_scan)
+    scanned_projects = sum(await asyncio.gather(*to_scan))
+    scan_time = datetime.now() - start_time
+    print(f"Scanned {str(scanned_projects)} of {str(total_projects)} projects in {scan_time.seconds} seconds")
 
-scan_time = datetime.now() - start_time
-print(f"Scanned {str(scanned_projects)} of {str(total_projects)} projects in {scan_time.seconds} seconds")
+    count = len(vulnerable_domains)
+    my_print("\nTotal Vulnerable Domains Found: " + str(count), "INFOB")
 
-count = len(vulnerable_domains)
-my_print(f"\nTotal Vulnerable Domains Found: {str(count)}", "INFOB")
+    if count > 0:
+        my_print("List of Vulnerable Domains:", "INFOB")
+        print_list(vulnerable_domains)
 
-if count > 0:
-    my_print("List of Vulnerable Domains:", "INFOB")
-    print_list(vulnerable_domains)
+
+if __name__ == "__main__":
+    asyncio.run(main())

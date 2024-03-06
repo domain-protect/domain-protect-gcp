@@ -1,7 +1,8 @@
+import asyncio
 from google.cloud.resourcemanager_v3 import (
-    FoldersClient,
+    FoldersAsyncClient,
     OrganizationsClient,
-    ProjectsClient,
+    ProjectsAsyncClient,
 )
 
 
@@ -16,55 +17,31 @@ def get_organization_id():
     return ""
 
 
-def list_folders(parent_id):
-    # Lists folders under a parent - requires Folder Viewer role at Organization level
-    folders_client = FoldersClient()
-    folders = folders_client.list_folders(parent=parent_id)
-    folder_list = [f.name for f in folders]
+async def list_all_projects():
+    async def list_projects(parent_id):
+        # Lists projects under a parent - requires Folder Viewer role at Organization level
+        async for project in await project_client.list_projects(parent=parent_id):
+            if project.project_id[:4] != "sys-":
+                all_projects.append(project.project_id)
+        return
 
-    return folder_list
+    async def list_folders(parent_id):
+        project_task = asyncio.create_task(list_projects(parent_id))
+        folder_tasks = []
+        # Lists folders under a parent - requires Folder Viewer role at Organization level
+        async for folder in await folder_client.list_folders(parent=parent_id):
+            folder_tasks.append(asyncio.create_task(list_folders(folder.name)))
+        if project_task is not None:
+            await project_task
+        return await asyncio.gather(*folder_tasks)
 
+    # Create Async Project and Folder Clients
+    project_client = ProjectsAsyncClient()
+    folder_client = FoldersAsyncClient()
 
-def list_projects(parent_id):
-    # Lists projects under a parent - requires Folder Viewer role at Organization level
-    projects_client = ProjectsClient()
-    projects = projects_client.list_projects(parent=parent_id)
-    project_list = [p.project_id for p in projects if not p.project_id.startswith("sys-")]
+    all_projects = []
 
-    return project_list
-
-
-def list_all_projects():
-    # Get organization ID
     org_id = get_organization_id()
+    await list_folders(org_id)
 
-    # Get all the project IDs at the organization level
-    all_projects = list_projects(org_id)
-
-    # Now retrieve all the folders directly under the organization
-    folder_ids = list_folders(org_id)
-
-    # Make sure that there are actually folders under the org
-    if len(folder_ids) == 0:
-        return all_projects
-
-    # Start iterating over the folders
-    while folder_ids:
-        # Get the last folder of the list
-        current_id = folder_ids.pop()
-
-        # Get subfolders and add them to the list of folders
-        subfolders = list_folders(current_id)
-
-        if subfolders:
-            folder_ids.extend(f for f in subfolders)
-
-        # Get the projects under that folder
-        projects_under_folder = list_projects(current_id)
-
-        # Add projects if there are any
-        if projects_under_folder:
-            all_projects.extend(p for p in projects_under_folder)
-
-    # Finally, return all the projects
     return all_projects
