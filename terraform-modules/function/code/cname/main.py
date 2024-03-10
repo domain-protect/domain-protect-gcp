@@ -5,9 +5,15 @@ import os
 import dns.resolver
 import google.cloud.dns
 from google.cloud import pubsub_v1
+from secrets import choice
+from string import ascii_letters, digits
 
 
 def vulnerable_cname(domain_name):
+    # Handle wildcard A records by passing in a random 5 character string
+    if domain_name[0] == "*":
+        random_string = "".join(choice(ascii_letters + digits) for _ in range(5))
+        domain_name = random_string + domain_name[1:]
 
     global aRecords
 
@@ -45,6 +51,7 @@ def gcp(project):
                     r
                     for r in records
                     if "CNAME" in r.record_type
+                    and r.rrdatas
                     and any(vulnerability in r.rrdatas[0] for vulnerability in vulnerability_list)
                 ]
 
@@ -56,7 +63,13 @@ def gcp(project):
                     if result:
                         print(f"VULNERABLE: {cname_record}  CNAME {cname_value} in GCP project {project}")
                         vulnerable_domains.append(cname_record)
-                        json_data["Findings"].append({"Project": project, "Domain": cname_record, "CNAME": cname_value})
+                        json_data["Findings"].append(
+                            {
+                                "Project": project,
+                                "Domain": cname_record,
+                                "CNAME": cname_value,
+                            }
+                        )
 
     except google.api_core.exceptions.Forbidden:
         pass
@@ -69,11 +82,20 @@ def cname(event, context):  # pylint:disable=unused-argument
     app_environment = os.environ["APP_ENVIRONMENT"]
 
     global vulnerability_list
-    vulnerability_list = ["azure", ".cloudapp.net", "core.windows.net", "elasticbeanstalk.com", "trafficmanager.net"]
+    vulnerability_list = [
+        "azure",
+        ".cloudapp.net",
+        "core.windows.net",
+        "elasticbeanstalk.com",
+        "trafficmanager.net",
+    ]
     global vulnerable_domains
     vulnerable_domains = []
     global json_data
-    json_data = {"Findings": [], "Subject": "Vulnerable CNAME records in Google Cloud DNS"}
+    json_data = {
+        "Findings": [],
+        "Subject": "Vulnerable CNAME records in Google Cloud DNS",
+    }
 
     if "data" in event:
         pubsub_message = base64.b64decode(event["data"]).decode("utf-8")
