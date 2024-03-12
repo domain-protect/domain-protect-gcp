@@ -2,6 +2,7 @@ from datetime import datetime
 
 import google.cloud.dns
 import requests
+from utils_vulnerable import get_vulnerable_list
 from utils_gcp import list_all_projects
 from utils_print import my_print, print_list
 from secrets import choice
@@ -11,7 +12,7 @@ start_time = datetime.now()
 vulnerable_domains = []
 suspected_domains = []
 cname_values = []
-vulnerability_list = ["amazonaws.com", "cloudfront.net", "c.storage.googleapis.com"]
+vulnerability_list = get_vulnerable_list()
 
 
 def vulnerable_storage(domain_name):
@@ -52,7 +53,7 @@ def gcp(project):
                     for r in records
                     if "CNAME" in r.record_type
                     and r.rrdatas
-                    and any(vulnerability in r.rrdatas[0] for vulnerability in vulnerability_list)
+                    and any(vulnerability in r.rrdatas[0] for vulnerability in vulnerability_list.keys())
                 ]
                 for resource_record_set in resource_record_sets:
                     cname_record = resource_record_set.name

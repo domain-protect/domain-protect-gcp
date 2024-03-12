@@ -1,7 +1,10 @@
 from datetime import datetime
 
+import aiohttp
 import dns.resolver
 import google.cloud.dns
+import asyncio
+from utils_vulnerable import get_vulnerable_list
 from utils_gcp import list_all_projects
 from utils_print import my_print, print_list
 from secrets import choice
@@ -9,15 +12,7 @@ from string import ascii_letters, digits
 
 start_time = datetime.now()
 vulnerable_domains = []
-cname_values = []
-vulnerability_list = [
-    "azure",
-    ".cloudapp.net",
-    "core.windows.net",
-    "elasticbeanstalk.com",
-    "trafficmanager.net",
-]
-
+vulnerability_list = get_vulnerable_list()
 
 def vulnerable_cname(domain_name):
     # Handle wildcard A records by passing in a random 5 character string
@@ -63,7 +58,7 @@ def gcp(project):
                     for r in records
                     if "CNAME" in r.record_type
                     and r.rrdatas
-                    and any(vulnerability in r.rrdatas[0] for vulnerability in vulnerability_list)
+                    and any(vulnerability in r.rrdatas[0] for vulnerability in vulnerability_list.keys())
                 ]
 
                 for resource_record_set in resource_record_sets:
@@ -74,7 +69,6 @@ def gcp(project):
                     i = i + 1
                     if result:
                         vulnerable_domains.append(cname_record)
-                        cname_values.append(cname_value)
                         my_print(f"{str(i)}.{cname_record} CNAME {cname_value}", "ERROR")
 
                     else:
