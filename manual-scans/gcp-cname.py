@@ -11,6 +11,7 @@ from string import ascii_letters, digits
 start_time = datetime.now()
 vulnerable_domains = []
 vulnerability_list = get_vulnerable_list()
+scanning_tasks = []
 
 
 async def vulnerable_cname(domain_name):
@@ -35,13 +36,7 @@ async def vulnerable_cname(domain_name):
         return ""
 
 
-async def run_queries(queries):
-    return await asyncio.gather(*queries)
-
-
 def gcp(project):
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
     print(f"Searching for Google Cloud DNS hosted zones in {project} project")
     dns_client = google.cloud.dns.client.Client(project)
     try:
@@ -61,13 +56,9 @@ def gcp(project):
                        and any(vulnerability in r.rrdatas[0] for vulnerability in vulnerability_list)
                 ]
 
-                queries = [loop.create_task(vulnerable_cname(rrset.name))
-                           for rrset
-                           in resource_record_sets]
-                tasks = asyncio.run(run_queries(queries))
-                for result in tasks:
-                    if result != "":
-                        vulnerable_domains.append(result)
+                [scanning_tasks.append(asyncio.create_task(vulnerable_cname(rrset.name)))
+                 for rrset
+                 in resource_record_sets]
         return 1
 
     except google.api_core.exceptions.Forbidden:
@@ -81,6 +72,9 @@ async def main():
 
     total_projects = len(to_scan)
     scanned_projects = sum(await asyncio.gather(*to_scan))
+    for result in await asyncio.gather(*scanning_tasks):
+        if result != "":
+            vulnerable_domains.append(result)
     scan_time = datetime.now() - start_time
     print(f"Scanned {str(scanned_projects)} of {str(total_projects)} projects in {scan_time.seconds} seconds")
 
