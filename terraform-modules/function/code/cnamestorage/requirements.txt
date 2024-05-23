@@ -1,4 +1,4 @@
 google-cloud-dns==0.34.1
 google-cloud-pubsub==2.14.0
 google-cloud-resource-manager==1.8.1
-requests==2.31.0
+requests==2.32.2
