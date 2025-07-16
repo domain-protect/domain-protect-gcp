@@ -1,2 +1,2 @@
 google-cloud-pubsub==2.14.0
-google-cloud-resource-manager==1.8.1
+google-cloud-resource-manager==1.14.2
