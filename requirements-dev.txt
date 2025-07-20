@@ -1,6 +1,6 @@
-black==24.3.0
-prospector==1.10.2
-google-cloud-dns==0.34.1
-google-cloud-resource-manager==1.8.1
-dnspython==2.6.1
-requests==2.32.2
+black==25.1.0
+prospector==1.17.2
+google-cloud-dns==0.35.1
+google-cloud-resource-manager==1.14.2
+dnspython==2.7.0
+requests==2.32.4
