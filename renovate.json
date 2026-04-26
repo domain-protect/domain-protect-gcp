@@ -1,0 +1,9 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "github>domain-protect/renovate-config",
+    "github>domain-protect/renovate-config:github-actions",
+    "github>domain-protect/renovate-config:python-packages",
+    "github>domain-protect/renovate-config:terraform-providers"
+  ]
+}
