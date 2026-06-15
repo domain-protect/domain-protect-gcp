@@ -3,4 +3,4 @@ prospector==1.18.0
 google-cloud-dns==0.37.0
 google-cloud-resource-manager==1.17.0
 dnspython==2.8.0
-requests==2.34.2
+requests==2.33.0
