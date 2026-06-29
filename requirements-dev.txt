@@ -1,5 +1,5 @@
 black==26.5.1
-prospector==1.18.0
+prospector==1.19.0
 google-cloud-dns==0.37.0
 google-cloud-resource-manager==1.17.0
 dnspython==2.8.0
