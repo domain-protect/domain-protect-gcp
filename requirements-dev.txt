@@ -2,5 +2,5 @@ black==26.10.1
 prospector==1.20.0
 google-cloud-dns==0.37.2
 google-cloud-resource-manager==1.19.0
-dnspython==2.9.1
+dnspython==2.9.2
 requests==2.34.2
